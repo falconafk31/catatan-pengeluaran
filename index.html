@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Inputin - Catatan Pengeluaran v9.1-pages -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -370,9 +371,9 @@ try {
             <div class="info"><div class="cat">{{ it.category }}</div><div class="note">{{ dayLabel(it.date) }} &middot; {{ it.note || '-' }}</div></div>
             <div class="amt">{{ rupiah(it.amount) }}</div>
           </div>
-          <div v-if="report.items.length > reportLimit" style="margin-top:14px">
-            <div class="load-note">Menampilkan {{ reportLimit }} dari {{ report.items.length }} transaksi</div>
-            <div style="text-align:center"><button class="load-btn" @click="reportLimit += 50">Muat lagi</button></div>
+          <div v-if="report.items.length < report.itemsTotal" style="margin-top:14px">
+            <div class="load-note">Menampilkan {{ report.items.length }} dari {{ report.itemsTotal }} transaksi</div>
+            <div style="text-align:center"><button class="load-btn" @click="loadMoreReport">Muat lagi</button></div>
           </div>
         </div>
       </section>
@@ -424,7 +425,7 @@ function pad(n) { return String(n).padStart(2, '0'); }
 function localISO(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
 function localYM(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1); }
 var API_URL = 'https://script.google.com/macros/s/AKfycbzxsdjIESfWWhGMoEiNqedzswcv5sQBHV3G8d_KVSV7upTC5XT2NyZvLCZTp7X9V4od/exec';
-var GET_FNS = { getSummary: ['token', 'month'], getExpenses: ['token', 'month'], getReport: ['token', 'type', 'ref'], getCategories: ['token'], getAutoRules: ['token'] };
+var GET_FNS = { getDashboard: ['token', 'month'], getSummary: ['token', 'month'], getExpenses: ['token', 'month'], getReport: ['token', 'type', 'ref', 'offset', 'limit'], getCategories: ['token'], getAutoRules: ['token'] };
 function call(fn) {
   var args = Array.prototype.slice.call(arguments, 1);
   function handle(j) {
@@ -517,7 +518,6 @@ if (!window.Vue) {
       var listErr = VueApi.ref('');
       var confirmDelete = VueApi.ref(null);
       var historyLimit = VueApi.ref(50);
-      var reportLimit = VueApi.ref(50);
       var toast = VueApi.ref('');
       var reportType = VueApi.ref('bulanan');
       var reportRef = VueApi.ref(localYM(today));
@@ -561,7 +561,7 @@ if (!window.Vue) {
         });
         return order.map(function (l) { return groups[l]; });
       });
-      var visibleReportItems = VueApi.computed(function () { return report.value ? report.value.items.slice(0, reportLimit.value) : []; });
+      var visibleReportItems = VueApi.computed(function () { return report.value ? report.value.items : []; });
       VueApi.watch([search, filterCat, month], function () { historyLimit.value = 50; });
       function rupiah(n) { return 'Rp' + Number(n || 0).toLocaleString('id-ID'); }
       var CAT_PALETTE = ['#B45309', '#1F4E79', '#9D2C5A', '#5B4B8A', '#166534', '#C2410C', '#0E7490', '#6E6A63'];
@@ -665,15 +665,18 @@ if (!window.Vue) {
       function writeCache(m, s, list) {
         try { localStorage.setItem('cp_cache', JSON.stringify({ month: m, summary: s, items: list, savedAt: Date.now() })); } catch (e) {}
       }
+      // v9.1: 1 panggilan getDashboard (dulu getSummary + getExpenses = 2 baca penuh).
       function refresh() {
         var m = month.value;
         var c = readCache(m);
         if (c) { summary.value = c.summary; items.value = c.items; }
         loading.value = true;
-        var pending = 2;
-        function done() { if (--pending <= 0) loading.value = false; }
-        call('getSummary', token.value, m).then(function (s) { summary.value = s; writeCache(m, s, items.value); done(); }).catch(function () { done(); });
-        call('getExpenses', token.value, m).then(function (list) { items.value = list; writeCache(m, summary.value, list); done(); }).catch(function () { done(); });
+        call('getDashboard', token.value, m).then(function (d) {
+          summary.value = { total: d.total, count: d.count, perCategory: d.perCategory };
+          items.value = d.items;
+          writeCache(m, summary.value, d.items);
+          loading.value = false;
+        }).catch(function () { loading.value = false; });
       }
       function switchTab(t) {
         tab.value = t;
@@ -850,9 +853,18 @@ if (!window.Vue) {
       function loadReport() {
         reportLoading.value = true;
         reportErr.value = '';
-        reportLimit.value = 50;
-        call('getReport', token.value, reportType.value, reportRef.value).then(function (r) {
+        call('getReport', token.value, reportType.value, reportRef.value, 0, 50).then(function (r) {
           report.value = r;
+          reportLoading.value = false;
+        }).catch(function (e) { reportLoading.value = false; reportErr.value = e || 'Gagal memuat laporan.'; });
+      }
+      // v9.1: halaman berikutnya diminta ke server (dulu semua item sudah terkirim).
+      function loadMoreReport() {
+        if (!report.value || reportLoading.value) return;
+        if (report.value.items.length >= report.value.itemsTotal) return;
+        reportLoading.value = true;
+        call('getReport', token.value, reportType.value, reportRef.value, report.value.items.length, 50).then(function (r) {
+          report.value.items = report.value.items.concat(r.items);
           reportLoading.value = false;
         }).catch(function (e) { reportLoading.value = false; reportErr.value = e || 'Gagal memuat laporan.'; });
       }
@@ -861,8 +873,10 @@ if (!window.Vue) {
         if (!window.jspdf || !window.jspdf.jsPDF || !window.jspdf.jsPDF.API.autoTable) { pdfErr.value = 'Pustaka PDF gagal dimuat. Periksa koneksi lalu coba lagi.'; return; }
         pdfBusy.value = true;
         pdfErr.value = '';
+        // v9.1: laporan di layar hanya halaman pertama; PDF butuh SEMUA item.
+        call('getReport', token.value, reportType.value, reportRef.value, 0, 0).then(function (full) {
         try {
-          var rep = report.value;
+          var rep = full;
           var doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
           var NAVY = [31, 78, 121];
           var INK = [28, 28, 26];
@@ -976,11 +990,12 @@ if (!window.Vue) {
           pdfBusy.value = false;
           showToast('PDF terunduh.');
         } catch (e) { pdfBusy.value = false; pdfErr.value = 'Gagal membuat PDF.'; }
+        }).catch(function () { pdfBusy.value = false; pdfErr.value = 'Gagal membuat PDF.'; });
       }
       VueApi.onMounted(function () {
         if (token.value) { loggedIn.value = true; boot(); }
       });
-      return { loggedIn: loggedIn, pw: pw, loginBusy: loginBusy, loginErr: loginErr, tab: tab, tabTitle: tabTitle, month: month, monthLabel: monthLabel, summary: summary, catList: catList, items: items, filteredItems: filteredItems, recentItems: recentItems, groupedItems: groupedItems, categories: categories, search: search, filterCat: filterCat, editingId: editingId, loading: loading, editingCat: editingCat, editCatName: editCatName, newCatName: newCatName, catErr: catErr, confirmDelete: confirmDelete, monthCompare: monthCompare, autoRules: autoRules, autoForm: autoForm, editingAuto: editingAuto, autoErr: autoErr, autoSaving: autoSaving, autoRunning: autoRunning, weekDays: weekDays, form: form, saving: saving, saveErr: saveErr, listErr: listErr, historyLimit: historyLimit, historyNote: historyNote, reportLimit: reportLimit, visibleReportItems: visibleReportItems, toast: toast, reportType: reportType, reportRef: reportRef, report: report, reportLoading: reportLoading, reportErr: reportErr, pdfBusy: pdfBusy, pdfErr: pdfErr, theme: theme, toggleTheme: toggleTheme, rupiah: rupiah, catColor: catColor, dayLabel: dayLabel, shortDate: shortDate, barWidth: barWidth, autoFreqText: autoFreqText, doLogin: doLogin, doLogout: doLogout, installApp: installApp, showInstallBtn: showInstallBtn, refresh: refresh, switchTab: switchTab, goAdd: goAdd, startEdit: startEdit, cancelEdit: cancelEdit, downloadCsv: downloadCsv, startCatEdit: startCatEdit, cancelCatEdit: cancelCatEdit, saveCatEdit: saveCatEdit, addCat: addCat, deleteCat: deleteCat, saveAuto: saveAuto, startAutoEdit: startAutoEdit, cancelAutoEdit: cancelAutoEdit, deleteAuto: deleteAuto, runAutoNow: runAutoNow, doSave: doSave, doDelete: doDelete, cancelDelete: cancelDelete, confirmDeleteYes: confirmDeleteYes, onReportType: onReportType, loadReport: loadReport, downloadPdf: downloadPdf };
+      return { loggedIn: loggedIn, pw: pw, loginBusy: loginBusy, loginErr: loginErr, tab: tab, tabTitle: tabTitle, month: month, monthLabel: monthLabel, summary: summary, catList: catList, items: items, filteredItems: filteredItems, recentItems: recentItems, groupedItems: groupedItems, categories: categories, search: search, filterCat: filterCat, editingId: editingId, loading: loading, editingCat: editingCat, editCatName: editCatName, newCatName: newCatName, catErr: catErr, confirmDelete: confirmDelete, monthCompare: monthCompare, autoRules: autoRules, autoForm: autoForm, editingAuto: editingAuto, autoErr: autoErr, autoSaving: autoSaving, autoRunning: autoRunning, weekDays: weekDays, form: form, saving: saving, saveErr: saveErr, listErr: listErr, historyLimit: historyLimit, historyNote: historyNote, visibleReportItems: visibleReportItems, toast: toast, reportType: reportType, reportRef: reportRef, report: report, reportLoading: reportLoading, reportErr: reportErr, pdfBusy: pdfBusy, pdfErr: pdfErr, theme: theme, toggleTheme: toggleTheme, rupiah: rupiah, catColor: catColor, dayLabel: dayLabel, shortDate: shortDate, barWidth: barWidth, autoFreqText: autoFreqText, doLogin: doLogin, doLogout: doLogout, installApp: installApp, showInstallBtn: showInstallBtn, refresh: refresh, switchTab: switchTab, goAdd: goAdd, startEdit: startEdit, cancelEdit: cancelEdit, downloadCsv: downloadCsv, startCatEdit: startCatEdit, cancelCatEdit: cancelCatEdit, saveCatEdit: saveCatEdit, addCat: addCat, deleteCat: deleteCat, saveAuto: saveAuto, startAutoEdit: startAutoEdit, cancelAutoEdit: cancelAutoEdit, deleteAuto: deleteAuto, runAutoNow: runAutoNow, doSave: doSave, doDelete: doDelete, cancelDelete: cancelDelete, confirmDeleteYes: confirmDeleteYes, onReportType: onReportType, loadReport: loadReport, loadMoreReport: loadMoreReport, downloadPdf: downloadPdf };
     }
   }).mount('#app');
 }
