@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Inputin - Catatan Pengeluaran v9.3-pages -->
+<!-- Inputin - Catatan Pengeluaran v9.4-pages -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -46,7 +46,11 @@ try {
   .install-hint { font-size: 12px; color: var(--muted); text-align: center; margin: 16px 0 0; line-height: 1.5; }
   .install-btn { display: block; width: 100%; min-height: 46px; margin-top: 10px; padding: 10px 14px; border: none; border-radius: 10px; background: var(--navy); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; }
   .theme-link { display: block; width: 100%; margin-top: 4px; background: none; border: none; color: var(--navy); font-size: 14px; font-weight: 700; cursor: pointer; min-height: 44px; }
-  .loading-note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 6px; }
+  .spin { width: 16px; height: 16px; border: 2px solid var(--line); border-top-color: var(--navy); border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; vertical-align: -3px; flex: 0 0 auto; }
+  .spin-lg { width: 28px; height: 28px; border-width: 3px; }
+  .spin-on-dark { border-color: rgba(255,255,255,.35); border-top-color: #fff; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-box { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px 0 4px; color: var(--muted); font-size: 13px; }
   .filter-row { display: flex; gap: 8px; margin-top: 8px; }
   .filter-row .field:first-child { flex: 1.6; }
   .filter-row .field:last-child { flex: 1; }
@@ -169,7 +173,7 @@ try {
       <h1>Inputin</h1>
       <p>Catatan Pengeluaran - buku kas harian. Masukkan password untuk membuka.</p>
       <input type="password" v-model="pw" placeholder="Password" autocomplete="current-password" @keyup.enter="doLogin">
-      <button class="btn-primary" :disabled="loginBusy" @click="doLogin">{{ loginBusy ? 'Memeriksa...' : 'Masuk' }}</button>
+      <button class="btn-primary" :disabled="loginBusy" @click="doLogin"><span v-if="loginBusy" class="spin spin-on-dark"></span> {{ loginBusy ? 'Memeriksa...' : 'Masuk' }}</button>
       <div class="err" v-if="loginErr">Password salah. Coba lagi.</div>
       <p class="install-hint">Tips: dari menu browser, pilih "Tambahkan ke layar utama" supaya bisa dibuka seperti aplikasi.</p>
       <button v-if="showInstallBtn" class="install-btn" @click="installApp">Pasang aplikasi</button>
@@ -205,7 +209,7 @@ try {
           <div v-else class="skel skel-meta"></div>
           <div class="month-row"><input type="month" v-model="month" @change="refresh"></div>
         </div>
-        <div class="loading-note" v-if="loading">Memuat data terbaru...</div>
+        <div class="loading-box" v-if="loading"><span class="spin spin-lg"></span><span>Memuat data terbaru...</span></div>
         <div class="err" v-if="loadErr" style="text-align:center">{{ loadErr }}</div>
         <div v-if="loading && items.length === 0">
           <div class="section-title">Per Kategori</div>
@@ -216,7 +220,7 @@ try {
         <div v-else-if="items.length === 0" class="empty-state">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3z"/><path d="M9 8h6M9 12h6"/></svg>
           <div class="empty-title">Belum ada pengeluaran bulan ini.</div>
-<div class="empty-sub">Catat pengeluaran pertamamu.</div>
+          <div class="empty-sub">Catat pengeluaran pertamamu.</div>
           <button class="save-btn" style="max-width:260px" @click="goAdd()">Tambah Pengeluaran</button>
         </div>
         <div v-else>
@@ -252,7 +256,7 @@ try {
           <input type="text" class="field" v-model="form.note" placeholder="contoh: Beli solar">
           <label>Dicatat oleh (opsional)</label>
           <input type="text" class="field" v-model="form.by" placeholder="nama">
-          <button class="save-btn" :disabled="saving" @click="doSave">{{ saving ? 'Menyimpan...' : (editingId ? 'Simpan Perubahan' : 'Simpan Pengeluaran') }}</button>
+          <button class="save-btn" :disabled="saving" @click="doSave"><span v-if="saving" class="spin spin-on-dark"></span> {{ saving ? 'Menyimpan...' : (editingId ? 'Simpan Perubahan' : 'Simpan Pengeluaran') }}</button>
           <button v-if="editingId" class="theme-link" @click="cancelEdit">Batalkan perubahan</button>
           <div class="err" v-if="saveErr" style="text-align:center">{{ saveErr }}</div>
         </div>
@@ -297,7 +301,7 @@ try {
               <button class="del" @click="deleteAuto(r)">Hapus</button>
             </div>
           </div>
-          <button class="save-btn" :disabled="autoRunning" @click="runAutoNow">{{ autoRunning ? 'Menjalankan...' : 'Jalankan sekarang' }}</button>
+          <button class="save-btn" :disabled="autoRunning" @click="runAutoNow"><span v-if="autoRunning" class="spin spin-on-dark"></span> {{ autoRunning ? 'Menjalankan...' : 'Jalankan sekarang' }}</button>
         </div>
         <div class="card" id="auto-form" style="margin-top:12px">
           <div class="section-title" style="margin-top:0">{{ editingAuto ? 'Ubah Aturan' : 'Aturan Baru' }}</div>
@@ -328,7 +332,7 @@ try {
           <label>Keterangan (opsional)</label>
           <input type="text" class="field" v-model="autoForm.note" placeholder="contoh: Token listrik">
           <label style="display:flex; align-items:center; gap:8px; margin-top:12px"><input type="checkbox" v-model="autoForm.active" style="width:20px; height:20px"> Aktif</label>
-          <button class="save-btn" :disabled="autoSaving" @click="saveAuto">{{ autoSaving ? 'Menyimpan...' : (editingAuto ? 'Simpan Perubahan' : 'Tambah Aturan') }}</button>
+          <button class="save-btn" :disabled="autoSaving" @click="saveAuto"><span v-if="autoSaving" class="spin spin-on-dark"></span> {{ autoSaving ? 'Menyimpan...' : (editingAuto ? 'Simpan Perubahan' : 'Tambah Aturan') }}</button>
           <button v-if="editingAuto" class="theme-link" @click="cancelAutoEdit">Batalkan perubahan</button>
           <div class="err" v-if="autoErr" style="text-align:center">{{ autoErr }}</div>
           <button class="theme-link" @click="switchTab('add')">Kembali ke Tambah</button>
@@ -380,7 +384,7 @@ try {
           <input v-if="reportType === 'bulanan'" type="month" class="field" v-model="reportRef" @change="loadReport">
           <input v-if="reportType === 'tahunan'" type="number" class="field" v-model.number="reportRef" min="2020" max="2100" @change="loadReport">
         </div>
-        <div v-if="reportLoading" class="empty-note" style="margin-top:16px">Memuat laporan...</div>
+        <div class="loading-box" v-if="reportLoading"><span class="spin spin-lg"></span><span>Memuat laporan...</span></div>
         <div class="err" v-if="reportErr" style="text-align:center">{{ reportErr }}</div>
         <div v-else-if="report">
           <div class="rep-total">
@@ -392,7 +396,7 @@ try {
             <div class="compare-row" v-if="monthCompare.prevCount > 0"><span>Selisih</span><b :class="monthCompare.cls">{{ monthCompare.text }}</b></div>
             <div class="compare-row" v-else><span>Belum ada pengeluaran bulan lalu.</span></div>
           </div>
-          <button class="save-btn" :disabled="pdfBusy" @click="downloadPdf">{{ pdfBusy ? 'Menyiapkan PDF...' : 'Unduh PDF' }}</button>
+          <button class="save-btn" :disabled="pdfBusy" @click="downloadPdf"><span v-if="pdfBusy" class="spin spin-on-dark"></span> {{ pdfBusy ? 'Menyiapkan PDF...' : 'Unduh PDF' }}</button>
           <div class="err" v-if="pdfErr" style="text-align:center">{{ pdfErr }}</div>
           <div class="section-title">Per Kategori</div>
           <div v-if="report.perCategory.length === 0" class="empty-note">Belum ada pengeluaran pada periode ini.</div>
@@ -434,7 +438,7 @@ try {
         </button>
         <button class="tab" :class="{ on: tab === 'report' }" @click="switchTab('report')">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"/></svg>
-<span>Laporan</span>
+          <span>Laporan</span>
         </button>
       </div>
     </nav>
@@ -652,11 +656,17 @@ if (!window.Vue) {
           else {
             var pct = prev ? Math.round(Math.abs(diff) / prev * 100) : 0;
             text = (diff > 0 ? 'Naik ' : 'Turun ') + rupiah(Math.abs(diff)) + ' (' + pct + '%)';
-          cls = diff > 0 ? 'diff-up' : 'diff-down';
+            cls = diff > 0 ? 'diff-up' : 'diff-down';
           }
         }
         return { prevLabel: report.value.prevLabel, prevTotal: prev, prevCount: report.value.prevCount || 0, text: text, cls: cls };
       });
+      // v9.4: hitung ulang ringkasan dari daftar lokal (dipakai update optimis).
+      function recomputeSummary() {
+        var t = 0; var per = {};
+        items.value.forEach(function (it) { t += it.amount; per[it.category] = (per[it.category] || 0) + it.amount; });
+        summary.value = { total: t, count: items.value.length, perCategory: per };
+      }
       function showToast(msg) { toast.value = msg; setTimeout(function () { toast.value = ''; }, 3500); }
       function doLogin() {
         if (!pw.value) return;
@@ -731,10 +741,14 @@ if (!window.Vue) {
         try { localStorage.setItem('cp_cache', JSON.stringify({ month: m, summary: s, items: list, savedAt: Date.now() })); } catch (e) {}
       }
       // v9.1: 1 panggilan getDashboard (dulu getSummary + getExpenses = 2 baca penuh).
-      function refresh() {
+      // v9.4: refresh(skipCache) - habis tambah/ubah/hapus, daftar lokal SUDAH
+      // optimis; jangan timpa dulu dengan cache lama (bikin baris sempat hilang
+      // lalu muncul lagi). Tanpa argumen (boot/ganti bulan/gagal) cache tetap
+      // dipakai: tampil instan, lalu data segar menimpa.
+      function refresh(skipCache) {
         var m = month.value;
         var c = readCache(m);
-        if (c) { summary.value = c.summary; items.value = c.items; }
+        if (c && !skipCache) { summary.value = c.summary; items.value = c.items; }
         loading.value = true;
         loadErr.value = '';
         call('getDashboard', token.value, m).then(function (d) {
@@ -831,7 +845,11 @@ if (!window.Vue) {
           call('deleteAutoRule', token.value, d.id).then(function () { showToast('Aturan dihapus.'); loadAutoRules(); }).catch(function (e) { autoErr.value = e || 'Gagal menghapus aturan.'; });
         } else {
           listErr.value = '';
-          call('deleteExpense', token.value, d.id).then(function () { showToast('Pengeluaran dihapus.'); refresh(); }).catch(function (e) { listErr.value = e || 'Gagal menghapus.'; });
+          // v9.4 optimis: baris langsung hilang dari layar, server menyusul; gagal -> refresh kembalikan.
+          var di = -1;
+          for (var i = 0; i < items.value.length; i++) { if (String(items.value[i].id) === String(d.id)) { di = i; break; } }
+          if (di !== -1) { items.value.splice(di, 1); recomputeSummary(); }
+          call('deleteExpense', token.value, d.id).then(function () { showToast('Pengeluaran dihapus.'); refresh(true); }).catch(function (e) { listErr.value = e || 'Gagal menghapus.'; refresh(); });
         }
       }
       function deleteCat(c) {
@@ -883,7 +901,7 @@ if (!window.Vue) {
         call('runAutoRules', token.value).then(function (r) {
           autoRunning.value = false;
           showToast(autoToast(r) || 'Tidak ada transaksi otomatis yang jatuh tempo.');
-          refresh();
+          refresh(true);
         }).catch(function (e) { autoRunning.value = false; autoErr.value = e || 'Gagal menjalankan aturan.'; });
       }
       function doSave() {
@@ -894,25 +912,46 @@ if (!window.Vue) {
         if (editingId.value) {
           var editId = editingId.value;
           var newMonth = String(form.value.date).slice(0, 7);
+          // v9.4 optimis (bulan sama): baris langsung berubah di layar; pindah bulan tetap ikut alur lama.
+          if (newMonth === month.value) {
+            for (var ei = 0; ei < items.value.length; ei++) {
+              if (String(items.value[ei].id) === String(editId)) {
+                items.value[ei].date = form.value.date;
+                items.value[ei].amount = Number(form.value.amount);
+                items.value[ei].category = form.value.category;
+                items.value[ei].note = form.value.note;
+                items.value[ei].by = form.value.by;
+                break;
+              }
+            }
+            recomputeSummary();
+          }
           call('updateExpense', token.value, editId, { date: form.value.date, amount: form.value.amount, category: form.value.category, note: form.value.note, by: form.value.by }).then(function () {
             saving.value = false;
             var moved = newMonth !== month.value;
             cancelEdit();
             if (moved) { month.value = newMonth; showToast('Perubahan tersimpan. Transaksi pindah ke ' + monthLabel.value + '.'); }
             else { showToast('Perubahan tersimpan.'); }
-            refresh();
+            refresh(true);
             switchTab('history');
-          }).catch(function (e) { saving.value = false; saveErr.value = e || 'Gagal menyimpan.'; });
+          }).catch(function (e) { saving.value = false; saveErr.value = e || 'Gagal menyimpan.'; refresh(); });
           return;
+        }
+        // v9.4 optimis: baris baru langsung muncul di atas daftar (id sementara, diganti server saat refresh).
+        var tmpId = null;
+        if (String(form.value.date).slice(0, 7) === month.value) {
+          tmpId = 'tmp-' + Date.now();
+          items.value.unshift({ id: tmpId, date: form.value.date, amount: Number(form.value.amount), category: form.value.category, note: form.value.note, by: form.value.by });
+          recomputeSummary();
         }
         call('addExpense', token.value, { date: form.value.date, amount: form.value.amount, category: form.value.category, note: form.value.note, by: form.value.by }).then(function () {
           saving.value = false;
           form.value.amount = '';
           form.value.note = '';
           showToast('Pengeluaran tersimpan.');
-          refresh();
+          refresh(true);
           switchTab('history');
-        }).catch(function (e) { saving.value = false; saveErr.value = e || 'Gagal menyimpan.'; });
+        }).catch(function (e) { saving.value = false; if (tmpId) { items.value = items.value.filter(function (x) { return x.id !== tmpId; }); recomputeSummary(); } saveErr.value = e || 'Gagal menyimpan.'; });
       }
       function doDelete(it) {
         listErr.value = '';
