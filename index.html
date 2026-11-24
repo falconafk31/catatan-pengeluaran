@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Inputin - Catatan Pengeluaran v9.1-pages -->
+<!-- Inputin - Catatan Pengeluaran v9.3-pages -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -26,7 +26,7 @@ try {
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 <style>
-  :root { --ink: #1C1C1A; --muted: #6E6A63; --line: #E3DFD8; --paper: #FBFAF7; --card: #FFFFFF; --navy: #1F4E79; --danger: #B42318; --ok: #166534; --input-border: #CFCBC2; --track: #EDEBE6; --toast-bg: #1C1C1A; --toast-fg: #fff; --del-bg: #FDF3F2; --del-border: #F1C6C2; color-scheme: light; }
+  :root { --ink: #1C1C1A; --muted: #5F5B54; --line: #E3DFD8; --paper: #FBFAF7; --card: #FFFFFF; --navy: #1F4E79; --danger: #B42318; --ok: #166534; --input-border: #CFCBC2; --track: #EDEBE6; --toast-bg: #1C1C1A; --toast-fg: #fff; --del-bg: #FDF3F2; --del-border: #F1C6C2; color-scheme: light; }
   html.dark { --ink: #F0EEE9; --muted: #A9A5A0; --line: #35354A; --paper: #14141F; --card: #232338; --navy: #2F6EA6; --danger: #F28B7E; --ok: #4ADE80; --input-border: #3A3A52; --track: #2D2D44; --toast-bg: #F0EEE9; --toast-fg: #1C1C1A; --del-bg: #3A2320; --del-border: #6B3229; color-scheme: dark; }
   * { box-sizing: border-box; }
   [v-cloak] { display: none; }
@@ -71,7 +71,7 @@ try {
   .wrap { max-width: 560px; margin: 0 auto; padding: 10px 16px calc(72px + env(safe-area-inset-bottom)); }
   .balance { background: #1E1E2E; border: 1px solid #1E1E2E; border-radius: 12px; padding: 12px 14px; }
   .balance .label { font-size: 12px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: #9A9AB0; }
-  .balance .total { font-size: 28px; font-weight: 800; letter-spacing: -1px; margin: 4px 0 2px; font-variant-numeric: tabular-nums; color: #fff; }
+  .balance .total { font-size: 34px; font-weight: 800; letter-spacing: -1px; margin: 4px 0 2px; font-variant-numeric: tabular-nums; color: #fff; }
   .balance .meta { font-size: 13px; color: #C9C9D6; }
   .month-row { display: flex; gap: 8px; margin-top: 8px; }
   .month-row input { flex: 1; min-width: 0; padding: 8px 12px; font-size: 16px; border: 1px solid var(--input-border); border-radius: 10px; background: var(--card); color: var(--ink); min-height: 46px; }
@@ -102,8 +102,9 @@ try {
   .save-btn { width: 100%; padding: 14px; margin-top: 10px; font-size: 16px; font-weight: 800; color: #fff; background: var(--navy); border: none; border-radius: 10px; cursor: pointer; min-height: 48px; }
   .save-btn:disabled { opacity: .55; }
   .day-group { font-size: 13px; font-weight: 800; color: var(--muted); margin: 14px 2px 0; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
-  .tx { display: flex; align-items: center; gap: 12px; background: var(--card); padding: 10px 2px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .tx { display: flex; align-items: center; gap: 12px; background: var(--card); padding: 12px 2px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
   .tx .icon { width: 40px; height: 40px; flex: 0 0 40px; border-radius: 8px; color: #fff; font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+  .tx .icon svg { width: 22px; height: 22px; }
   .tx .info { flex: 1; min-width: 0; }
   .tx .cat { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tx .note { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
@@ -123,6 +124,7 @@ try {
   .bottom-nav .tabs { display: flex; max-width: 560px; margin: 0 auto; height: 62px; }
   .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; background: none; border: none; min-height: 56px; color: var(--muted); font-size: 12px; font-weight: 600; cursor: pointer; padding: 6px 0 4px; }
   .tab.on { color: var(--navy); }
+  .tab.on svg { background: var(--track); border-radius: 10px; }
   .tab svg { width: 24px; height: 24px; }
   .seg { display: flex; background: var(--track); border-radius: 10px; padding: 3px; gap: 3px; }
   .seg button { flex: 1; min-width: 0; border: none; background: transparent; padding: 8px 2px; border-radius: 8px; font-size: 14px; font-weight: 700; color: var(--muted); min-height: 44px; cursor: pointer; }
@@ -139,6 +141,20 @@ try {
   .rep-row b { font-variant-numeric: tabular-nums; white-space: nowrap; }
   .rep-row .cnt { font-size: 12px; color: var(--muted); font-weight: 400; }
   .fallback { padding: 40px 20px; text-align: center; color: var(--muted); font-size: 14px; }
+  .skel { background: #E7E4DD; border-radius: 8px; animation: skel-pulse 1.2s ease-in-out infinite; }
+  html.dark .skel { background: #2D2D44; }
+  .balance .skel { background: #2D2D44; }
+  @keyframes skel-pulse { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+  .skel-total { height: 40px; width: 60%; margin: 4px 0 2px; }
+  .skel-meta { height: 16px; width: 40%; }
+  .skel-row { display: flex; gap: 8px; }
+  .skel-chip { height: 56px; width: 108px; flex: 0 0 auto; }
+  .skel-tx { height: 60px; margin-bottom: 8px; }
+  .empty-state { text-align: center; padding: 28px 16px; color: var(--muted); }
+  .empty-state svg { width: 48px; height: 48px; color: var(--muted); }
+  .empty-title { font-size: 15px; font-weight: 700; color: var(--ink); margin-top: 12px; }
+  .empty-sub { font-size: 13px; margin-top: 4px; }
+  .empty-state .save-btn { margin-top: 16px; }
   @media (max-width: 380px) {
     .balance .total { font-size: 28px; }
     .rep-total .amt { font-size: 26px; }
@@ -183,11 +199,27 @@ try {
         <button v-if="showInstallBtn" class="install-btn install-btn-banner" @click="installApp">Pasang aplikasi di HP</button>
         <div class="balance">
           <div class="label">Total bulan ini</div>
-          <div class="total">{{ rupiah(summary.total) }}</div>
-          <div class="meta">{{ summary.count }} transaksi</div>
+          <div class="total" v-if="!(loading && items.length === 0)">{{ rupiah(summary.total) }}</div>
+          <div v-else class="skel skel-total"></div>
+          <div class="meta" v-if="!(loading && items.length === 0)">{{ summary.count }} transaksi</div>
+          <div v-else class="skel skel-meta"></div>
           <div class="month-row"><input type="month" v-model="month" @change="refresh"></div>
         </div>
         <div class="loading-note" v-if="loading">Memuat data terbaru...</div>
+        <div class="err" v-if="loadErr" style="text-align:center">{{ loadErr }}</div>
+        <div v-if="loading && items.length === 0">
+          <div class="section-title">Per Kategori</div>
+          <div class="skel-row"><div class="skel skel-chip"></div><div class="skel skel-chip"></div><div class="skel skel-chip"></div></div>
+          <div class="section-title">Transaksi Terakhir</div>
+          <div class="skel skel-tx"></div><div class="skel skel-tx"></div><div class="skel skel-tx"></div>
+        </div>
+        <div v-else-if="items.length === 0" class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3z"/><path d="M9 8h6M9 12h6"/></svg>
+          <div class="empty-title">Belum ada pengeluaran bulan ini.</div>
+<div class="empty-sub">Catat pengeluaran pertamamu.</div>
+          <button class="save-btn" style="max-width:260px" @click="goAdd()">Tambah Pengeluaran</button>
+        </div>
+        <div v-else>
         <div class="section-title">Per Kategori</div>
         <div v-if="catList.length === 0" class="empty-note">Belum ada pengeluaran bulan ini.</div>
         <div v-else class="cat-scroll">
@@ -199,9 +231,10 @@ try {
         <div class="section-title">Transaksi Terakhir <button class="link-btn" @click="switchTab('history')">Lihat semua</button></div>
         <div v-if="recentItems.length === 0" class="empty-note">Belum ada pengeluaran bulan ini.</div>
         <div class="tx" v-for="it in recentItems" :key="it.id">
-          <div class="icon" :style="{ background: catColor(it.category) }">{{ it.category.charAt(0) }}</div>
+          <div class="icon" :style="{ background: catColor(it.category) }" v-html="catIconHtml(it.category)"></div>
           <div class="info"><div class="cat">{{ it.category }}</div><div class="note">{{ it.note || '-' }}<span v-if="it.by"> &middot; {{ it.by }}</span></div></div>
           <div class="amt">{{ rupiah(it.amount) }}</div>
+        </div>
         </div>
       </section>
 
@@ -228,7 +261,7 @@ try {
       <section v-if="tab === 'cats'">
         <div class="card">
           <div class="tx" v-for="c in categories" :key="c">
-            <div class="icon" :style="{ background: catColor(c) }">{{ c.charAt(0) }}</div>
+            <div class="icon" :style="{ background: catColor(c) }" v-html="catIconHtml(c)"></div>
             <div class="info" v-if="editingCat === c"><input class="field" v-model="editCatName" placeholder="Nama kategori"></div>
             <div class="info" v-else><div class="cat">{{ c }}</div></div>
             <div class="tx-actions" v-if="editingCat === c">
@@ -253,7 +286,7 @@ try {
           <div class="section-title" style="margin-top:0">Aturan Otomatis</div>
           <div v-if="autoRules.length === 0" class="empty-note">Belum ada transaksi otomatis. Tambahkan aturan di bawah.</div>
           <div class="tx" v-for="r in autoRules" :key="r.id">
-            <div class="icon" :style="{ background: catColor(r.category) }">{{ r.category.charAt(0) }}</div>
+            <div class="icon" :style="{ background: catColor(r.category) }" v-html="catIconHtml(r.category)"></div>
             <div class="info">
               <div class="cat">{{ r.name }} <span v-if="!r.active" style="color:var(--muted)">(nonaktif)</span></div>
               <div class="note">{{ autoFreqText(r) }} &middot; {{ rupiah(r.amount) }}</div>
@@ -303,17 +336,22 @@ try {
       </section>
 
       <section v-if="tab === 'history'">
-        <div class="month-row" style="margin-top:4px"><input type="month" v-model="month" @change="refresh"><button class="csv-btn" @click="downloadCsv" :disabled="!items.length">CSV</button></div>
+        <div class="month-row" style="margin-top:4px"><input type="month" v-model="month" @change="refresh"><button class="csv-btn" @click="downloadCsv" :disabled="!filteredItems.length">CSV</button></div>
         <div class="filter-row">
           <input type="search" class="field" v-model="search" placeholder="Cari transaksi">
           <select class="field" v-model="filterCat"><option value="">Semua</option><option v-for="c in categories" :key="c" :value="c">{{ c }}</option></select>
         </div>
-        <div v-if="items.length === 0" class="empty-note" style="margin-top:16px">Belum ada pengeluaran bulan ini.</div>
+        <div v-if="items.length === 0" class="empty-state" style="margin-top:16px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3z"/><path d="M9 8h6M9 12h6"/></svg>
+          <div class="empty-title">Belum ada pengeluaran bulan ini.</div>
+          <div class="empty-sub">Catat pengeluaran pertamamu.</div>
+          <button class="save-btn" style="max-width:260px" @click="goAdd()">Tambah Pengeluaran</button>
+        </div>
         <div v-else-if="filteredItems.length === 0" class="empty-note" style="margin-top:16px">Tidak ada hasil yang cocok.</div>
         <div v-for="g in groupedItems" :key="g.label">
           <div class="day-group">{{ g.label }} &middot; {{ rupiah(g.total) }}</div>
           <div class="tx" v-for="it in g.rows" :key="it.id">
-            <div class="icon" :style="{ background: catColor(it.category) }">{{ it.category.charAt(0) }}</div>
+            <div class="icon" :style="{ background: catColor(it.category) }" v-html="catIconHtml(it.category)"></div>
             <div class="info"><div class="cat">{{ it.category }}</div><div class="note">{{ it.note || '-' }}<span v-if="it.by"> &middot; {{ it.by }}</span></div></div>
             <div class="amt">{{ rupiah(it.amount) }}</div>
             <div class="tx-actions">
@@ -343,6 +381,7 @@ try {
           <input v-if="reportType === 'tahunan'" type="number" class="field" v-model.number="reportRef" min="2020" max="2100" @change="loadReport">
         </div>
         <div v-if="reportLoading" class="empty-note" style="margin-top:16px">Memuat laporan...</div>
+        <div class="err" v-if="reportErr" style="text-align:center">{{ reportErr }}</div>
         <div v-else-if="report">
           <div class="rep-total">
             <div class="amt">{{ rupiah(report.total) }}</div>
@@ -367,7 +406,7 @@ try {
           <div class="rep-row" v-for="r in report.rows" :key="r.label"><span>{{ r.label }} <span class="cnt">({{ r.count }} transaksi)</span></span><b>{{ rupiah(r.total) }}</b></div>
           <div class="section-title" v-if="report.items.length">Detail Transaksi</div>
           <div class="tx" v-for="it in visibleReportItems" :key="it.id">
-            <div class="icon" :style="{ background: catColor(it.category) }">{{ it.category.charAt(0) }}</div>
+            <div class="icon" :style="{ background: catColor(it.category) }" v-html="catIconHtml(it.category)"></div>
             <div class="info"><div class="cat">{{ it.category }}</div><div class="note">{{ dayLabel(it.date) }} &middot; {{ it.note || '-' }}</div></div>
             <div class="amt">{{ rupiah(it.amount) }}</div>
           </div>
@@ -382,24 +421,20 @@ try {
     <nav class="bottom-nav" aria-label="Menu utama">
       <div class="tabs">
         <button class="tab" :class="{ on: tab === 'home' }" @click="switchTab('home')">
-          <svg v-if="tab === 'home'" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 8h-3v9h-5v-6h-2v6H6v-9H3l9-8z"/></svg>
-          <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 9.5V20a1 1 0 001 1h12a1 1 0 001-1V9.5"/><path d="M9.5 21v-6h5v6"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 5.69l5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg>
           <span>Beranda</span>
         </button>
         <button class="tab" :class="{ on: tab === 'add' }" @click="goAdd()">
-          <svg v-if="tab === 'add'" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1 5h2v4h4v2h-4v4h-2v-4H7v-2h4V7z"/></svg>
-          <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
           <span>Tambah</span>
         </button>
         <button class="tab" :class="{ on: tab === 'history' }" @click="switchTab('history')">
-          <svg v-if="tab === 'history'" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h2v2H4zm4 0h12v2H8zM4 11h2v2H4zm4 0h12v2H8zM4 16h2v2H4zm4 0h12v2H8z"/></svg>
-          <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1" fill="currentColor" stroke="none"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
           <span>Riwayat</span>
         </button>
         <button class="tab" :class="{ on: tab === 'report' }" @click="switchTab('report')">
-          <svg v-if="tab === 'report'" viewBox="0 0 24 24" fill="currentColor"><path d="M4 20V10h3v10H4zm6.5 0V4h3v16h-3zM17 20v-7h3v7h-3z"/></svg>
-          <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10.5 20V4M17 20v-7M3 20h18"/></svg>
-          <span>Laporan</span>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"/></svg>
+<span>Laporan</span>
         </button>
       </div>
     </nav>
@@ -419,13 +454,24 @@ try {
 
 <script>
 var CAT_COLORS = { 'Makan & Minum': '#B45309', 'Transport': '#1F4E79', 'Belanja': '#9D2C5A', 'Tagihan & Utilitas': '#5B4B8A', 'Kesehatan': '#166534', 'Hiburan': '#C2410C', 'Pendidikan': '#0E7490', 'Lainnya': '#6E6A63' };
+var CAT_ICONS = {
+  'Makan & Minum': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13h16c0 3.3-3.6 6-8 6s-8-2.7-8-6z"/><path d="M9 9.5c0-1.6 1-1.6 1-3.2M14 9.5c0-1.6 1-1.6 1-3.2"/></svg>',
+  'Transport': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8v18H6z"/><path d="M8.5 7h3v3h-3z"/><path d="M14 8h2a2 2 0 012 2v4"/><path d="M4 21h12"/></svg>',
+  'Belanja': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/><path d="M3 4h2l2.4 11.2a1 1 0 001 .8h8.9a1 1 0 001-.8L20 8H6"/></svg>',
+  'Tagihan & Utilitas': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3z"/><path d="M9 8h6M9 12h6"/></svg>',
+  'Tagihan': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3z"/><path d="M9 8h6M9 12h6"/></svg>',
+  'Kesehatan': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>',
+  'Hiburan': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.5v5l4.5-2.5L10 9.5z"/></svg>',
+  'Pendidikan': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-1.5-8 0v13c3-1.5 6-1.5 8 0 2-1.5 5-1.5 8 0V6c-3-1.5-6-1.5-8 0z"/><path d="M12 6v13"/></svg>',
+  'Lainnya': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>'
+};
 var MONTHS_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 var MONTHS_SHORT = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 function pad(n) { return String(n).padStart(2, '0'); }
 function localISO(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
 function localYM(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1); }
 var API_URL = 'https://script.google.com/macros/s/AKfycbzxsdjIESfWWhGMoEiNqedzswcv5sQBHV3G8d_KVSV7upTC5XT2NyZvLCZTp7X9V4od/exec';
-var GET_FNS = { getDashboard: ['token', 'month'], getSummary: ['token', 'month'], getExpenses: ['token', 'month'], getReport: ['token', 'type', 'ref', 'offset', 'limit'], getCategories: ['token'], getAutoRules: ['token'] };
+var GET_FNS = { getDashboard: ['token', 'month'], getSummary: ['token', 'month'], getExpenses: ['token', 'month'], getReport: ['token', 'type', 'ref', 'offset', 'limit', 'afterId'], getCategories: ['token'], getAutoRules: ['token'] };
 function call(fn) {
   var args = Array.prototype.slice.call(arguments, 1);
   function handle(j) {
@@ -501,6 +547,7 @@ if (!window.Vue) {
       var filterCat = VueApi.ref('');
       var editingId = VueApi.ref(null);
       var loading = VueApi.ref(false);
+      var loadErr = VueApi.ref('');
       var editingCat = VueApi.ref(null);
       var editCatName = VueApi.ref('');
       var newCatName = VueApi.ref('');
@@ -571,6 +618,10 @@ if (!window.Vue) {
         for (var i = 0; i < c.length; i++) h = (h * 31 + c.charCodeAt(i)) >>> 0;
         return CAT_PALETTE[h % CAT_PALETTE.length];
       }
+      function catIconHtml(c) {
+        if (CAT_ICONS[c]) return CAT_ICONS[c];
+        return (c || '?').charAt(0);
+      }
       var MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
       function shortDate(s) {
         if (!s) return '';
@@ -601,12 +652,12 @@ if (!window.Vue) {
           else {
             var pct = prev ? Math.round(Math.abs(diff) / prev * 100) : 0;
             text = (diff > 0 ? 'Naik ' : 'Turun ') + rupiah(Math.abs(diff)) + ' (' + pct + '%)';
-            cls = diff > 0 ? 'diff-up' : 'diff-down';
+          cls = diff > 0 ? 'diff-up' : 'diff-down';
           }
         }
         return { prevLabel: report.value.prevLabel, prevTotal: prev, prevCount: report.value.prevCount || 0, text: text, cls: cls };
       });
-      function showToast(msg) { toast.value = msg; setTimeout(function () { toast.value = ''; }, 2500); }
+      function showToast(msg) { toast.value = msg; setTimeout(function () { toast.value = ''; }, 3500); }
       function doLogin() {
         if (!pw.value) return;
         loginBusy.value = true;
@@ -645,13 +696,27 @@ if (!window.Vue) {
       function loadAutoRules() {
         call('getAutoRules', token.value).then(function (rs) {
           autoRules.value = rs;
-        }).catch(function () {});
+        }).catch(function (e) { if (String(e).indexOf('token') !== -1) clearSession(); });
+      }
+      function autoToast(r) {
+        if (!r || !r.created) return '';
+        var ms = {};
+        (r.items || []).forEach(function (it) {
+          var p = String(it.date || '').split('-');
+          if (p.length >= 2) ms[p[0] + '-' + p[1]] = true;
+        });
+        var labels = Object.keys(ms).sort().map(function (ym) {
+          var q = ym.split('-');
+          return MONTHS_ID[Number(q[1]) - 1] + ' ' + q[0];
+        });
+        return r.created + ' transaksi otomatis ditambahkan' + (labels.length ? ' (' + labels.join(', ') + ')' : '') + '.';
       }
       function boot() {
         loadCategories();
         loadAutoRules();
         call('runAutoRules', token.value).then(function (r) {
-          if (r && r.created) showToast(r.created + ' transaksi otomatis ditambahkan.');
+          var t = autoToast(r);
+          if (t) showToast(t);
           refresh();
         }).catch(function () { refresh(); });
       }
@@ -671,12 +736,17 @@ if (!window.Vue) {
         var c = readCache(m);
         if (c) { summary.value = c.summary; items.value = c.items; }
         loading.value = true;
+        loadErr.value = '';
         call('getDashboard', token.value, m).then(function (d) {
           summary.value = { total: d.total, count: d.count, perCategory: d.perCategory };
           items.value = d.items;
           writeCache(m, summary.value, d.items);
           loading.value = false;
-        }).catch(function () { loading.value = false; });
+        }).catch(function (e) {
+          loading.value = false;
+          if (String(e).indexOf('token') !== -1) { clearSession(); return; }
+          loadErr.value = 'Gagal memuat data terbaru. Data yang tampil mungkin sudah lama.';
+        });
       }
       function switchTab(t) {
         tab.value = t;
@@ -701,10 +771,10 @@ if (!window.Vue) {
         switchTab('add');
       }
       function downloadCsv() {
-        if (!items.value.length) return;
+        if (!filteredItems.value.length) return;
         function esc(v) { var s = String(v == null ? '' : v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
         var lines = ['Tanggal,Kategori,Keterangan,Dicatat Oleh,Jumlah (Rp)'];
-        items.value.forEach(function (it) { lines.push([it.date, it.category, it.note || '', it.by || '', it.amount].map(esc).join(',')); });
+        filteredItems.value.forEach(function (it) { lines.push([it.date, it.category, it.note || '', it.by || '', it.amount].map(esc).join(',')); });
         var blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');
@@ -731,6 +801,7 @@ if (!window.Vue) {
         if (!oldName || !name) return;
         call('renameCategory', token.value, oldName, name).then(function () {
           cancelCatEdit();
+          if (filterCat.value === oldName) filterCat.value = name;
           showToast('Kategori diubah.');
           loadCategories();
           refresh();
@@ -754,7 +825,7 @@ if (!window.Vue) {
         confirmDelete.value = null;
         if (d.kind === 'category') {
           catErr.value = '';
-          call('deleteCategory', token.value, d.id).then(function () { showToast('Kategori dihapus.'); loadCategories(); }).catch(function (e) { catErr.value = e || 'Gagal menghapus kategori.'; });
+          call('deleteCategory', token.value, d.id).then(function () { if (filterCat.value === d.id) filterCat.value = ''; showToast('Kategori dihapus.'); loadCategories(); }).catch(function (e) { catErr.value = e || 'Gagal menghapus kategori.'; });
         } else if (d.kind === 'auto') {
           autoErr.value = '';
           call('deleteAutoRule', token.value, d.id).then(function () { showToast('Aturan dihapus.'); loadAutoRules(); }).catch(function (e) { autoErr.value = e || 'Gagal menghapus aturan.'; });
@@ -811,7 +882,7 @@ if (!window.Vue) {
         autoRunning.value = true;
         call('runAutoRules', token.value).then(function (r) {
           autoRunning.value = false;
-          showToast(r && r.created ? r.created + ' transaksi otomatis ditambahkan.' : 'Tidak ada transaksi otomatis yang jatuh tempo.');
+          showToast(autoToast(r) || 'Tidak ada transaksi otomatis yang jatuh tempo.');
           refresh();
         }).catch(function (e) { autoRunning.value = false; autoErr.value = e || 'Gagal menjalankan aturan.'; });
       }
@@ -822,10 +893,13 @@ if (!window.Vue) {
         saving.value = true;
         if (editingId.value) {
           var editId = editingId.value;
+          var newMonth = String(form.value.date).slice(0, 7);
           call('updateExpense', token.value, editId, { date: form.value.date, amount: form.value.amount, category: form.value.category, note: form.value.note, by: form.value.by }).then(function () {
             saving.value = false;
+            var moved = newMonth !== month.value;
             cancelEdit();
-            showToast('Perubahan tersimpan.');
+            if (moved) { month.value = newMonth; showToast('Perubahan tersimpan. Transaksi pindah ke ' + monthLabel.value + '.'); }
+            else { showToast('Perubahan tersimpan.'); }
             refresh();
             switchTab('history');
           }).catch(function (e) { saving.value = false; saveErr.value = e || 'Gagal menyimpan.'; });
@@ -856,15 +930,20 @@ if (!window.Vue) {
         call('getReport', token.value, reportType.value, reportRef.value, 0, 50).then(function (r) {
           report.value = r;
           reportLoading.value = false;
-        }).catch(function (e) { reportLoading.value = false; reportErr.value = e || 'Gagal memuat laporan.'; });
+        }).catch(function (e) { reportLoading.value = false; if (String(e).indexOf('token') !== -1) { clearSession(); return; } reportErr.value = e || 'Gagal memuat laporan.'; });
       }
       // v9.1: halaman berikutnya diminta ke server (dulu semua item sudah terkirim).
       function loadMoreReport() {
         if (!report.value || reportLoading.value) return;
         if (report.value.items.length >= report.value.itemsTotal) return;
         reportLoading.value = true;
-        call('getReport', token.value, reportType.value, reportRef.value, report.value.items.length, 50).then(function (r) {
-          report.value.items = report.value.items.concat(r.items);
+        var last = report.value.items[report.value.items.length - 1];
+        call('getReport', token.value, reportType.value, reportRef.value, report.value.items.length, 50, last ? last.id : '').then(function (r) {
+          var seen = {};
+          report.value.items.forEach(function (it) { seen[String(it.id)] = true; });
+          (r.items || []).forEach(function (it) {
+            if (!seen[String(it.id)]) { seen[String(it.id)] = true; report.value.items.push(it); }
+          });
           reportLoading.value = false;
         }).catch(function (e) { reportLoading.value = false; reportErr.value = e || 'Gagal memuat laporan.'; });
       }
@@ -995,7 +1074,7 @@ if (!window.Vue) {
       VueApi.onMounted(function () {
         if (token.value) { loggedIn.value = true; boot(); }
       });
-      return { loggedIn: loggedIn, pw: pw, loginBusy: loginBusy, loginErr: loginErr, tab: tab, tabTitle: tabTitle, month: month, monthLabel: monthLabel, summary: summary, catList: catList, items: items, filteredItems: filteredItems, recentItems: recentItems, groupedItems: groupedItems, categories: categories, search: search, filterCat: filterCat, editingId: editingId, loading: loading, editingCat: editingCat, editCatName: editCatName, newCatName: newCatName, catErr: catErr, confirmDelete: confirmDelete, monthCompare: monthCompare, autoRules: autoRules, autoForm: autoForm, editingAuto: editingAuto, autoErr: autoErr, autoSaving: autoSaving, autoRunning: autoRunning, weekDays: weekDays, form: form, saving: saving, saveErr: saveErr, listErr: listErr, historyLimit: historyLimit, historyNote: historyNote, visibleReportItems: visibleReportItems, toast: toast, reportType: reportType, reportRef: reportRef, report: report, reportLoading: reportLoading, reportErr: reportErr, pdfBusy: pdfBusy, pdfErr: pdfErr, theme: theme, toggleTheme: toggleTheme, rupiah: rupiah, catColor: catColor, dayLabel: dayLabel, shortDate: shortDate, barWidth: barWidth, autoFreqText: autoFreqText, doLogin: doLogin, doLogout: doLogout, installApp: installApp, showInstallBtn: showInstallBtn, refresh: refresh, switchTab: switchTab, goAdd: goAdd, startEdit: startEdit, cancelEdit: cancelEdit, downloadCsv: downloadCsv, startCatEdit: startCatEdit, cancelCatEdit: cancelCatEdit, saveCatEdit: saveCatEdit, addCat: addCat, deleteCat: deleteCat, saveAuto: saveAuto, startAutoEdit: startAutoEdit, cancelAutoEdit: cancelAutoEdit, deleteAuto: deleteAuto, runAutoNow: runAutoNow, doSave: doSave, doDelete: doDelete, cancelDelete: cancelDelete, confirmDeleteYes: confirmDeleteYes, onReportType: onReportType, loadReport: loadReport, loadMoreReport: loadMoreReport, downloadPdf: downloadPdf };
+      return { loggedIn: loggedIn, pw: pw, loginBusy: loginBusy, loginErr: loginErr, tab: tab, tabTitle: tabTitle, month: month, monthLabel: monthLabel, summary: summary, catList: catList, items: items, filteredItems: filteredItems, recentItems: recentItems, groupedItems: groupedItems, categories: categories, search: search, filterCat: filterCat, editingId: editingId, loading: loading, editingCat: editingCat, editCatName: editCatName, newCatName: newCatName, catErr: catErr, confirmDelete: confirmDelete, monthCompare: monthCompare, autoRules: autoRules, autoForm: autoForm, editingAuto: editingAuto, autoErr: autoErr, autoSaving: autoSaving, autoRunning: autoRunning, weekDays: weekDays, form: form, saving: saving, saveErr: saveErr, listErr: listErr, historyLimit: historyLimit, historyNote: historyNote, visibleReportItems: visibleReportItems, toast: toast, reportType: reportType, reportRef: reportRef, report: report, reportLoading: reportLoading, reportErr: reportErr, pdfBusy: pdfBusy, pdfErr: pdfErr, loadErr: loadErr, theme: theme, toggleTheme: toggleTheme, rupiah: rupiah, catColor: catColor, catIconHtml: catIconHtml, dayLabel: dayLabel, shortDate: shortDate, barWidth: barWidth, autoFreqText: autoFreqText, doLogin: doLogin, doLogout: doLogout, installApp: installApp, showInstallBtn: showInstallBtn, refresh: refresh, switchTab: switchTab, goAdd: goAdd, startEdit: startEdit, cancelEdit: cancelEdit, downloadCsv: downloadCsv, startCatEdit: startCatEdit, cancelCatEdit: cancelCatEdit, saveCatEdit: saveCatEdit, addCat: addCat, deleteCat: deleteCat, saveAuto: saveAuto, startAutoEdit: startAutoEdit, cancelAutoEdit: cancelAutoEdit, deleteAuto: deleteAuto, runAutoNow: runAutoNow, doSave: doSave, doDelete: doDelete, cancelDelete: cancelDelete, confirmDeleteYes: confirmDeleteYes, onReportType: onReportType, loadReport: loadReport, loadMoreReport: loadMoreReport, downloadPdf: downloadPdf };
     }
   }).mount('#app');
 }
