@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Inputin - Catatan Pengeluaran v9.5-pages -->
+<!-- Inputin - Catatan Pengeluaran v9.6-pages -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -448,8 +448,8 @@ try {
         <div class="modal-title">{{ confirmDelete.title }}</div>
         <div class="modal-msg">{{ confirmDelete.detail }}</div>
         <div class="modal-actions">
-          <button class="btn-ghost" @click="cancelDelete">Batal</button>
-          <button class="btn-danger" @click="confirmDeleteYes">Hapus</button>
+          <button class="btn-ghost" @click="cancelDelete" :disabled="deleting">Batal</button>
+          <button class="btn-danger" @click="confirmDeleteYes" :disabled="deleting"><span v-if="deleting" class="spin spin-on-dark"></span>{{ deleting ? 'Menghapus...' : 'Hapus' }}</button>
         </div>
       </div>
     </div>
@@ -568,6 +568,7 @@ if (!window.Vue) {
       var saveErr = VueApi.ref('');
       var listErr = VueApi.ref('');
       var confirmDelete = VueApi.ref(null);
+      var deleting = VueApi.ref(false);
       var historyLimit = VueApi.ref(50);
       var toast = VueApi.ref('');
       var reportType = VueApi.ref('bulanan');
@@ -832,24 +833,26 @@ if (!window.Vue) {
         }).catch(function (e) { catErr.value = e || 'Gagal menambah kategori.'; });
       }
       function askDelete(kind, id, title, detail) { confirmDelete.value = { kind: kind, id: id, title: title, detail: detail }; }
-      function cancelDelete() { confirmDelete.value = null; }
+      function cancelDelete() { if (deleting.value) return; confirmDelete.value = null; }
       function confirmDeleteYes() {
         var d = confirmDelete.value;
-        if (!d) return;
-        confirmDelete.value = null;
+        if (!d || deleting.value) return;
+        // v9.6: modal TETAP terbuka + tombol Hapus berputar sampai server menjawab,
+        // baru tertutup (berhasil: toast + refresh; gagal: pesan + refresh kembalikan).
+        deleting.value = true;
         if (d.kind === 'category') {
           catErr.value = '';
-          call('deleteCategory', token.value, d.id).then(function () { if (filterCat.value === d.id) filterCat.value = ''; showToast('Kategori dihapus.'); loadCategories(); }).catch(function (e) { catErr.value = e || 'Gagal menghapus kategori.'; });
+          call('deleteCategory', token.value, d.id).then(function () { if (filterCat.value === d.id) filterCat.value = ''; showToast('Kategori dihapus.'); loadCategories(); }).catch(function (e) { catErr.value = e || 'Gagal menghapus kategori.'; }).finally(function () { deleting.value = false; confirmDelete.value = null; });
         } else if (d.kind === 'auto') {
           autoErr.value = '';
-          call('deleteAutoRule', token.value, d.id).then(function () { showToast('Aturan dihapus.'); loadAutoRules(); }).catch(function (e) { autoErr.value = e || 'Gagal menghapus aturan.'; });
+          call('deleteAutoRule', token.value, d.id).then(function () { showToast('Aturan dihapus.'); loadAutoRules(); }).catch(function (e) { autoErr.value = e || 'Gagal menghapus aturan.'; }).finally(function () { deleting.value = false; confirmDelete.value = null; });
         } else {
           listErr.value = '';
           // v9.4 optimis: baris langsung hilang dari layar, server menyusul; gagal -> refresh kembalikan.
           var di = -1;
           for (var i = 0; i < items.value.length; i++) { if (String(items.value[i].id) === String(d.id)) { di = i; break; } }
           if (di !== -1) { items.value.splice(di, 1); recomputeSummary(); }
-          call('deleteExpense', token.value, d.id).then(function () { showToast('Pengeluaran dihapus.'); refresh(true); }).catch(function (e) { listErr.value = e || 'Gagal menghapus.'; refresh(); });
+          call('deleteExpense', token.value, d.id).then(function () { showToast('Pengeluaran dihapus.'); refresh(true); }).catch(function (e) { listErr.value = e || 'Gagal menghapus.'; refresh(); }).finally(function () { deleting.value = false; confirmDelete.value = null; });
         }
       }
       function deleteCat(c) {
@@ -1113,7 +1116,7 @@ if (!window.Vue) {
       VueApi.onMounted(function () {
         if (token.value) { loggedIn.value = true; boot(); }
       });
-      return { loggedIn: loggedIn, pw: pw, loginBusy: loginBusy, loginErr: loginErr, tab: tab, tabTitle: tabTitle, month: month, monthLabel: monthLabel, summary: summary, catList: catList, items: items, filteredItems: filteredItems, recentItems: recentItems, groupedItems: groupedItems, categories: categories, search: search, filterCat: filterCat, editingId: editingId, loading: loading, editingCat: editingCat, editCatName: editCatName, newCatName: newCatName, catErr: catErr, confirmDelete: confirmDelete, monthCompare: monthCompare, autoRules: autoRules, autoForm: autoForm, editingAuto: editingAuto, autoErr: autoErr, autoSaving: autoSaving, autoRunning: autoRunning, weekDays: weekDays, form: form, saving: saving, saveErr: saveErr, listErr: listErr, historyLimit: historyLimit, historyNote: historyNote, visibleReportItems: visibleReportItems, toast: toast, reportType: reportType, reportRef: reportRef, report: report, reportLoading: reportLoading, reportErr: reportErr, pdfBusy: pdfBusy, pdfErr: pdfErr, loadErr: loadErr, theme: theme, toggleTheme: toggleTheme, rupiah: rupiah, catColor: catColor, catIconHtml: catIconHtml, dayLabel: dayLabel, shortDate: shortDate, barWidth: barWidth, autoFreqText: autoFreqText, doLogin: doLogin, doLogout: doLogout, installApp: installApp, showInstallBtn: showInstallBtn, refresh: refresh, switchTab: switchTab, goAdd: goAdd, startEdit: startEdit, cancelEdit: cancelEdit, downloadCsv: downloadCsv, startCatEdit: startCatEdit, cancelCatEdit: cancelCatEdit, saveCatEdit: saveCatEdit, addCat: addCat, deleteCat: deleteCat, saveAuto: saveAuto, startAutoEdit: startAutoEdit, cancelAutoEdit: cancelAutoEdit, deleteAuto: deleteAuto, runAutoNow: runAutoNow, doSave: doSave, doDelete: doDelete, cancelDelete: cancelDelete, confirmDeleteYes: confirmDeleteYes, onReportType: onReportType, loadReport: loadReport, loadMoreReport: loadMoreReport, downloadPdf: downloadPdf };
+      return { loggedIn: loggedIn, pw: pw, loginBusy: loginBusy, loginErr: loginErr, tab: tab, tabTitle: tabTitle, month: month, monthLabel: monthLabel, summary: summary, catList: catList, items: items, filteredItems: filteredItems, recentItems: recentItems, groupedItems: groupedItems, categories: categories, search: search, filterCat: filterCat, editingId: editingId, loading: loading, editingCat: editingCat, editCatName: editCatName, newCatName: newCatName, catErr: catErr, confirmDelete: confirmDelete, deleting: deleting, monthCompare: monthCompare, autoRules: autoRules, autoForm: autoForm, editingAuto: editingAuto, autoErr: autoErr, autoSaving: autoSaving, autoRunning: autoRunning, weekDays: weekDays, form: form, saving: saving, saveErr: saveErr, listErr: listErr, historyLimit: historyLimit, historyNote: historyNote, visibleReportItems: visibleReportItems, toast: toast, reportType: reportType, reportRef: reportRef, report: report, reportLoading: reportLoading, reportErr: reportErr, pdfBusy: pdfBusy, pdfErr: pdfErr, loadErr: loadErr, theme: theme, toggleTheme: toggleTheme, rupiah: rupiah, catColor: catColor, catIconHtml: catIconHtml, dayLabel: dayLabel, shortDate: shortDate, barWidth: barWidth, autoFreqText: autoFreqText, doLogin: doLogin, doLogout: doLogout, installApp: installApp, showInstallBtn: showInstallBtn, refresh: refresh, switchTab: switchTab, goAdd: goAdd, startEdit: startEdit, cancelEdit: cancelEdit, downloadCsv: downloadCsv, startCatEdit: startCatEdit, cancelCatEdit: cancelCatEdit, saveCatEdit: saveCatEdit, addCat: addCat, deleteCat: deleteCat, saveAuto: saveAuto, startAutoEdit: startAutoEdit, cancelAutoEdit: cancelAutoEdit, deleteAuto: deleteAuto, runAutoNow: runAutoNow, doSave: doSave, doDelete: doDelete, cancelDelete: cancelDelete, confirmDeleteYes: confirmDeleteYes, onReportType: onReportType, loadReport: loadReport, loadMoreReport: loadMoreReport, downloadPdf: downloadPdf };
     }
   }).mount('#app');
 }
