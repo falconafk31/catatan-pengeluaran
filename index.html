@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Inputin - Catatan Pengeluaran v9.7-pages -->
+<!-- Inputin - Catatan Pengeluaran v9.8-pages -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -26,7 +26,7 @@ try {
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 <style>
-  :root { --ink: #1C1C1A; --muted: #5F5B54; --line: #E3DFD8; --paper: #FBFAF7; --card: #FFFFFF; --navy: #1F4E79; --danger: #B42318; --ok: #166534; --input-border: #CFCBC2; --track: #EDEBE6; --toast-bg: #1C1C1A; --toast-fg: #fff; --del-bg: #FDF3F2; --del-border: #F1C6C2; color-scheme: light; }
+  :root { --ink: #1C1C1A; --muted: #5F5B54; --line: #E9E6DF; --paper: #FBFAF7; --card: #FFFFFF; --navy: #1F4E79; --danger: #B42318; --ok: #166534; --input-border: #CFCBC2; --track: #F1EEE7; --toast-bg: #1C1C1A; --toast-fg: #fff; --del-bg: #FDF3F2; --del-border: #F1C6C2; color-scheme: light; }
   html.dark { --ink: #F0EEE9; --muted: #A9A5A0; --line: #35354A; --paper: #14141F; --card: #232338; --navy: #2F6EA6; --danger: #F28B7E; --ok: #4ADE80; --input-border: #3A3A52; --track: #2D2D44; --toast-bg: #F0EEE9; --toast-fg: #1C1C1A; --del-bg: #3A2320; --del-border: #6B3229; color-scheme: dark; }
   * { box-sizing: border-box; }
   [v-cloak] { display: none; }
@@ -169,6 +169,30 @@ try {
     .rep-total .amt { font-size: 26px; }
     .wrap { padding-left: 12px; padding-right: 12px; }
   }
+
+  /* UI v9.8 - Navy Modern (arah B, 25 Nov 2026: bentuk Oyenza + navy Inputin) */
+:root{--paper:#FBFAF7;--card:#FFFFFF;--line:#E9E6DF;--track:#F1EEE7;}
+.card,.compare{border-radius:20px;}
+.cat-chip{border-radius:16px;}
+.amount-box,.field{border-radius:16px;background:#F5F5F7;border-color:transparent;}
+.amount-box:focus-within,.field:focus{box-shadow:0 0 0 3px rgba(31,78,121,.14);}
+.save-btn,.btn-primary,.install-btn{border-radius:999px;}
+.chip{border-radius:999px;}
+.tx .icon{width:44px;height:44px;flex:0 0 44px;border-radius:50%;}
+.tx .icon svg{width:23px;height:23px;}
+.section-title{background:transparent;color:var(--ink);padding:6px 2px;border-radius:0;}
+.section-title .link-btn{color:var(--navy);}
+.seg{border-radius:999px;} .seg button.on{border-radius:999px;}
+.tab.on svg{border-radius:999px;}
+.modal-card{border-radius:24px;}
+.balance{border-radius:20px;}
+.login-card{border-radius:20px;}
+.rep-total .amt{font-size:32px;}
+  /* Penyesuaian mode gelap (mockup hanya mode terang) */
+html.dark .amount-box, html.dark .field { background: var(--track); border-color: transparent; }
+html.dark .amount-box:focus-within, html.dark .field:focus { box-shadow: 0 0 0 3px rgba(47,110,166,.25); }
+html.dark .section-title .link-btn { color: #FFD166; }
+
 </style>
 </head>
 <body>
@@ -447,19 +471,19 @@ try {
     <nav class="bottom-nav" aria-label="Menu utama">
       <div class="tabs">
         <button class="tab" :class="{ on: tab === 'home' }" @click="switchTab('home')">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 5.69l5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           <span>Beranda</span>
         </button>
         <button class="tab" :class="{ on: tab === 'add' }" @click="goAdd()">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
           <span>Tambah</span>
         </button>
         <button class="tab" :class="{ on: tab === 'history' }" @click="switchTab('history')">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
           <span>Riwayat</span>
         </button>
         <button class="tab" :class="{ on: tab === 'report' }" @click="switchTab('report')">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
           <span>Laporan</span>
         </button>
       </div>
@@ -479,18 +503,8 @@ try {
 </div>
 
 <script>
-var CAT_COLORS = { 'Makan & Minum': '#B45309', 'Transport': '#1F4E79', 'Belanja': '#9D2C5A', 'Tagihan & Utilitas': '#5B4B8A', 'Kesehatan': '#166534', 'Hiburan': '#C2410C', 'Pendidikan': '#0E7490', 'Lainnya': '#6E6A63' };
-var CAT_ICONS = {
-  'Makan & Minum': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13h16c0 3.3-3.6 6-8 6s-8-2.7-8-6z"/><path d="M9 9.5c0-1.6 1-1.6 1-3.2M14 9.5c0-1.6 1-1.6 1-3.2"/></svg>',
-  'Transport': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8v18H6z"/><path d="M8.5 7h3v3h-3z"/><path d="M14 8h2a2 2 0 012 2v4"/><path d="M4 21h12"/></svg>',
-  'Belanja': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/><path d="M3 4h2l2.4 11.2a1 1 0 001 .8h8.9a1 1 0 001-.8L20 8H6"/></svg>',
-  'Tagihan & Utilitas': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3z"/><path d="M9 8h6M9 12h6"/></svg>',
-  'Tagihan': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3z"/><path d="M9 8h6M9 12h6"/></svg>',
-  'Kesehatan': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>',
-  'Hiburan': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.5v5l4.5-2.5L10 9.5z"/></svg>',
-  'Pendidikan': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-1.5-8 0v13c3-1.5 6-1.5 8 0 2-1.5 5-1.5 8 0V6c-3-1.5-6-1.5-8 0z"/><path d="M12 6v13"/></svg>',
-  'Lainnya': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>'
-};
+var CAT_COLORS = { 'Makan & Minum': '#FDEBD7', 'Transport': '#DCEBF5', 'Belanja': '#F9DCE8', 'Tagihan & Utilitas': '#E7E2F6', 'Tagihan': '#E7E2F6', 'Kesehatan': '#D9F0DD', 'Hiburan': '#FFE9D6', 'Pendidikan': '#D8EEF3', 'Lainnya': '#EDEBE6' };
+var CAT_ICONS = { 'Makan & Minum': '<svg viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>', 'Transport': '<svg viewBox="0 0 24 24" fill="none" stroke="#1F4E79" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>', 'Belanja': '<svg viewBox="0 0 24 24" fill="none" stroke="#9D2C5A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>', 'Tagihan & Utilitas': '<svg viewBox="0 0 24 24" fill="none" stroke="#5B4B8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg>', 'Tagihan': '<svg viewBox="0 0 24 24" fill="none" stroke="#5B4B8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg>', 'Kesehatan': '<svg viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/></svg>', 'Hiburan': '<svg viewBox="0 0 24 24" fill="none" stroke="#C2410C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 3v18"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/></svg>', 'Pendidikan': '<svg viewBox="0 0 24 24" fill="none" stroke="#0E7490" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>', 'Lainnya': '<svg viewBox="0 0 24 24" fill="none" stroke="#6E6A63" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="m7.5 4.27 9 5.15"/></svg>' };
 var MONTHS_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 var MONTHS_SHORT = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 function pad(n) { return String(n).padStart(2, '0'); }
