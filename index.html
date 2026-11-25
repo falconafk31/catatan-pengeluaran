@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Inputin - Catatan Pengeluaran v9.6-pages -->
+<!-- Inputin - Catatan Pengeluaran v9.7-pages -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -51,7 +51,8 @@ try {
   .spin-on-dark { border-color: rgba(255,255,255,.35); border-top-color: #fff; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-box { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px 0 4px; color: var(--muted); font-size: 13px; }
-  .filter-row { display: flex; gap: 8px; margin-top: 8px; }
+  .filter-row { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .filter-row .field { flex: 1; min-width: 0; }
   .filter-row .field:first-child { flex: 1.6; }
   .filter-row .field:last-child { flex: 1; }
   .edit-btn { background: none; border: 1px solid var(--line); color: var(--navy); font-size: 12px; font-weight: 700; border-radius: 999px; padding: 8px 10px; cursor: pointer; white-space: nowrap; min-height: 40px; }
@@ -101,6 +102,10 @@ try {
   .chip { border: 1px solid var(--input-border); background: var(--card); border-radius: 999px; padding: 9px 14px; font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; min-height: 44px; }
   .chip.on { background: var(--navy); border-color: var(--navy); color: #fff; }
   .chip .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+  .team-chip { display: inline-block; font-size: 10px; font-weight: 700; color: var(--navy); background: var(--track); border-radius: 6px; padding: 2px 6px; margin-left: 6px; vertical-align: 1px; }
+  .ana-row { background: var(--card); border-bottom: 1px solid var(--line); padding: 9px 2px; font-size: 14px; }
+  .ana-row .ana-label { color: var(--muted); font-size: 13px; }
+  .ana-row .ana-val { display: block; margin-top: 2px; font-variant-numeric: tabular-nums; }
   .field { width: 100%; padding: 10px 14px; font-size: 16px; border: 1px solid var(--input-border); border-radius: 10px; background: var(--card); color: var(--ink); min-height: 46px; }
   .field:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(31, 78, 121, .12); }
   .save-btn { width: 100%; padding: 14px; margin-top: 10px; font-size: 16px; font-weight: 800; color: #fff; background: var(--navy); border: none; border-radius: 10px; cursor: pointer; min-height: 48px; }
@@ -236,7 +241,7 @@ try {
         <div v-if="recentItems.length === 0" class="empty-note">Belum ada pengeluaran bulan ini.</div>
         <div class="tx" v-for="it in recentItems" :key="it.id">
           <div class="icon" :style="{ background: catColor(it.category) }" v-html="catIconHtml(it.category)"></div>
-          <div class="info"><div class="cat">{{ it.category }}</div><div class="note">{{ it.note || '-' }}<span v-if="it.by"> &middot; {{ it.by }}</span></div></div>
+          <div class="info"><div class="cat">{{ it.category }} <span class="team-chip">{{ it.team || 'Team 1' }}</span></div><div class="note">{{ it.note || '-' }}<span v-if="it.by"> &middot; {{ it.by }}</span></div></div>
           <div class="amt">{{ rupiah(it.amount) }}</div>
         </div>
         </div>
@@ -245,6 +250,12 @@ try {
       <section v-if="tab === 'add'">
         <div class="card">
           <div class="amount-box"><span class="rp">Rp</span><input type="number" v-model="form.amount" inputmode="numeric" min="1" placeholder="0"></div>
+          <label>Team</label>
+          <div class="chip-grid">
+            <button type="button" class="chip" :class="{ on: team === 'Team 1' }" @click="team = 'Team 1'">Team 1</button>
+            <button type="button" class="chip" :class="{ on: team === 'Team 2' }" @click="team = 'Team 2'">Team 2</button>
+            <button type="button" class="chip" :class="{ on: team === 'Team 3' }" @click="team = 'Team 3'">Team 3</button>
+          </div>
           <label>Kategori</label>
           <div class="chip-grid">
             <button type="button" class="chip" :class="{ on: form.category === c }" v-for="c in categories" :key="c" @click="form.category = c"><span class="dot" :style="{ background: catColor(c) }"></span>{{ c }}</button>
@@ -344,6 +355,7 @@ try {
         <div class="filter-row">
           <input type="search" class="field" v-model="search" placeholder="Cari transaksi">
           <select class="field" v-model="filterCat"><option value="">Semua</option><option v-for="c in categories" :key="c" :value="c">{{ c }}</option></select>
+          <select class="field" v-model="filterTeam"><option value="">Semua Team</option><option>Team 1</option><option>Team 2</option><option>Team 3</option></select>
         </div>
         <div v-if="!loading && items.length === 0" class="empty-state" style="margin-top:16px">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3z"/><path d="M9 8h6M9 12h6"/></svg>
@@ -356,7 +368,7 @@ try {
           <div class="day-group">{{ g.label }} &middot; {{ rupiah(g.total) }}</div>
           <div class="tx" v-for="it in g.rows" :key="it.id">
             <div class="icon" :style="{ background: catColor(it.category) }" v-html="catIconHtml(it.category)"></div>
-            <div class="info"><div class="cat">{{ it.category }}</div><div class="note">{{ it.note || '-' }}<span v-if="it.by"> &middot; {{ it.by }}</span></div></div>
+            <div class="info"><div class="cat">{{ it.category }} <span class="team-chip">{{ it.team || 'Team 1' }}</span></div><div class="note">{{ it.note || '-' }}<span v-if="it.by"> &middot; {{ it.by }}</span></div></div>
             <div class="amt">{{ rupiah(it.amount) }}</div>
             <div class="tx-actions">
               <button class="edit-btn" @click="startEdit(it)">Ubah</button>
@@ -384,6 +396,9 @@ try {
           <input v-if="reportType === 'bulanan'" type="month" class="field" v-model="reportRef" @change="loadReport">
           <input v-if="reportType === 'tahunan'" type="number" class="field" v-model.number="reportRef" min="2020" max="2100" @change="loadReport">
         </div>
+        <div style="margin-top:8px">
+          <select class="field" v-model="reportTeam" @change="loadReport"><option value="">Semua Team</option><option>Team 1</option><option>Team 2</option><option>Team 3</option></select>
+        </div>
         <div class="loading-box" v-if="reportLoading"><span class="spin spin-lg"></span><span>Memuat laporan...</span></div>
         <div class="err" v-if="reportErr" style="text-align:center">{{ reportErr }}</div>
         <div v-else-if="report">
@@ -398,6 +413,13 @@ try {
           </div>
           <button class="save-btn" :disabled="pdfBusy" @click="downloadPdf"><span v-if="pdfBusy" class="spin spin-on-dark"></span> {{ pdfBusy ? 'Menyiapkan PDF...' : 'Unduh PDF' }}</button>
           <div class="err" v-if="pdfErr" style="text-align:center">{{ pdfErr }}</div>
+          <div class="section-title" v-if="analysis">Analisa</div>
+          <div v-if="analysis">
+            <div class="ana-row" v-if="analysis.bigCat"><span class="ana-label">Kategori terbesar</span><b class="ana-val">{{ analysis.bigCat.name }} &middot; {{ rupiah(analysis.bigCat.amount) }} ({{ analysis.bigCat.pct }}%)</b></div>
+            <div class="ana-row" v-if="analysis.bigTeam"><span class="ana-label">Team terbesar</span><b class="ana-val">{{ analysis.bigTeam.name }} &middot; {{ rupiah(analysis.bigTeam.amount) }} ({{ analysis.bigTeam.pct }}%)</b></div>
+            <div class="ana-row"><span class="ana-label">Rata-rata per hari</span><b class="ana-val">{{ rupiah(analysis.avgDay) }}</b></div>
+            <div class="ana-row" v-if="analysis.biggest"><span class="ana-label">Transaksi terbesar</span><b class="ana-val">{{ shortDate(analysis.biggest.date) }} &middot; {{ analysis.biggest.note || analysis.biggest.category }} &middot; {{ rupiah(analysis.biggest.amount) }}</b></div>
+          </div>
           <div class="section-title">Per Kategori</div>
           <div v-if="report.perCategory.length === 0" class="empty-note">Belum ada pengeluaran pada periode ini.</div>
           <div v-else>
@@ -411,7 +433,7 @@ try {
           <div class="section-title" v-if="report.items.length">Detail Transaksi</div>
           <div class="tx" v-for="it in visibleReportItems" :key="it.id">
             <div class="icon" :style="{ background: catColor(it.category) }" v-html="catIconHtml(it.category)"></div>
-            <div class="info"><div class="cat">{{ it.category }}</div><div class="note">{{ dayLabel(it.date) }} &middot; {{ it.note || '-' }}</div></div>
+            <div class="info"><div class="cat">{{ it.category }} <span class="team-chip">{{ it.team || 'Team 1' }}</span></div><div class="note">{{ dayLabel(it.date) }} &middot; {{ it.note || '-' }}</div></div>
             <div class="amt">{{ rupiah(it.amount) }}</div>
           </div>
           <div v-if="report.items.length < report.itemsTotal" style="margin-top:14px">
@@ -475,7 +497,7 @@ function pad(n) { return String(n).padStart(2, '0'); }
 function localISO(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
 function localYM(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1); }
 var API_URL = 'https://script.google.com/macros/s/AKfycbzxsdjIESfWWhGMoEiNqedzswcv5sQBHV3G8d_KVSV7upTC5XT2NyZvLCZTp7X9V4od/exec';
-var GET_FNS = { getDashboard: ['token', 'month'], getSummary: ['token', 'month'], getExpenses: ['token', 'month'], getReport: ['token', 'type', 'ref', 'offset', 'limit', 'afterId'], getCategories: ['token'], getAutoRules: ['token'] };
+var GET_FNS = { getDashboard: ['token', 'month'], getSummary: ['token', 'month'], getExpenses: ['token', 'month'], getReport: ['token', 'type', 'ref', 'offset', 'limit', 'afterId', 'team'], getCategories: ['token'], getAutoRules: ['token'] };
 function call(fn) {
   var args = Array.prototype.slice.call(arguments, 1);
   function handle(j) {
@@ -564,6 +586,9 @@ if (!window.Vue) {
       var autoRunning = VueApi.ref(false);
       var weekDays = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
       var form = VueApi.ref({ date: todayStr, amount: '', category: '', note: '', by: '' });
+      var team = VueApi.ref('Team 1');
+      var filterTeam = VueApi.ref('');
+      var reportTeam = VueApi.ref('');
       var saving = VueApi.ref(false);
       var saveErr = VueApi.ref('');
       var listErr = VueApi.ref('');
@@ -595,6 +620,7 @@ if (!window.Vue) {
         var q = (search.value || '').toLowerCase().trim();
         return items.value.filter(function (it) {
           if (filterCat.value && it.category !== filterCat.value) return false;
+          if (filterTeam.value && (it.team || 'Team 1') !== filterTeam.value) return false;
           if (!q) return true;
           var hay = (it.note + ' ' + it.category + ' ' + (it.by || '') + ' ' + String(it.amount)).toLowerCase();
           return hay.indexOf(q) !== -1;
@@ -614,7 +640,7 @@ if (!window.Vue) {
         return order.map(function (l) { return groups[l]; });
       });
       var visibleReportItems = VueApi.computed(function () { return report.value ? report.value.items : []; });
-      VueApi.watch([search, filterCat, month], function () { historyLimit.value = 50; });
+      VueApi.watch([search, filterCat, filterTeam, month], function () { historyLimit.value = 50; });
       function rupiah(n) { return 'Rp' + Number(n || 0).toLocaleString('id-ID'); }
       var CAT_PALETTE = ['#B45309', '#1F4E79', '#9D2C5A', '#5B4B8A', '#166534', '#C2410C', '#0E7490', '#6E6A63'];
       function catColor(c) {
@@ -661,6 +687,26 @@ if (!window.Vue) {
           }
         }
         return { prevLabel: report.value.prevLabel, prevTotal: prev, prevCount: report.value.prevCount || 0, text: text, cls: cls };
+      });
+      // v9.7: Analisa sederhana - kategori terbesar, Team terbesar,
+      // rata-rata per hari, transaksi terbesar (dari data laporan penuh).
+      var analysis = VueApi.computed(function () {
+        if (!report.value || !report.value.total) return null;
+        var total = report.value.total || 0;
+        var perCat = report.value.perCategory || [];
+        var bigCat = perCat.length ? perCat[0] : null;
+        var bigTeam = null;
+        (report.value.perTeam || []).forEach(function (t) { if (!bigTeam || t.amount > bigTeam.amount) bigTeam = t; });
+        var days = 1;
+        if (reportType.value === '7hari') days = 7;
+        else if (reportType.value === 'bulanan') { var q = String(reportRef.value).split('-'); days = new Date(Number(q[0]), Number(q[1]), 0).getDate(); }
+        else if (reportType.value === 'tahunan') { var yy = Number(reportRef.value); days = (new Date(yy, 1, 29).getMonth() === 1) ? 366 : 365; }
+        return {
+          bigCat: bigCat ? { name: bigCat.name, amount: bigCat.amount, pct: total ? Math.round(bigCat.amount / total * 100) : 0 } : null,
+          bigTeam: (!reportTeam.value && bigTeam && bigTeam.amount > 0) ? { name: bigTeam.name, amount: bigTeam.amount, pct: total ? Math.round(bigTeam.amount / total * 100) : 0 } : null,
+          avgDay: Math.round(total / days),
+          biggest: report.value.biggest || null
+        };
       });
       // v9.4: hitung ulang ringkasan dari daftar lokal (dipakai update optimis).
       function recomputeSummary() {
@@ -770,10 +816,12 @@ if (!window.Vue) {
       }
       function resetForm() {
         form.value = { date: todayStr, amount: '', category: categories.value.length ? categories.value[0] : '', note: '', by: '' };
+        team.value = 'Team 1';
       }
       function startEdit(it) {
         editingId.value = it.id;
         form.value = { date: it.date, amount: String(it.amount), category: it.category, note: it.note || '', by: it.by || '' };
+        team.value = it.team || 'Team 1';
         saveErr.value = '';
         switchTab('add');
       }
@@ -788,8 +836,8 @@ if (!window.Vue) {
       function downloadCsv() {
         if (!filteredItems.value.length) return;
         function esc(v) { var s = String(v == null ? '' : v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
-        var lines = ['Tanggal,Kategori,Keterangan,Dicatat Oleh,Jumlah (Rp)'];
-        filteredItems.value.forEach(function (it) { lines.push([it.date, it.category, it.note || '', it.by || '', it.amount].map(esc).join(',')); });
+        var lines = ['Tanggal,Team,Kategori,Keterangan,Dicatat Oleh,Jumlah (Rp)'];
+        filteredItems.value.forEach(function (it) { lines.push([it.date, it.team || 'Team 1', it.category, it.note || '', it.by || '', it.amount].map(esc).join(',')); });
         var blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');
@@ -924,12 +972,13 @@ if (!window.Vue) {
                 items.value[ei].category = form.value.category;
                 items.value[ei].note = form.value.note;
                 items.value[ei].by = form.value.by;
+                items.value[ei].team = team.value;
                 break;
               }
             }
             recomputeSummary();
           }
-          call('updateExpense', token.value, editId, { date: form.value.date, amount: form.value.amount, category: form.value.category, note: form.value.note, by: form.value.by }).then(function () {
+          call('updateExpense', token.value, editId, { date: form.value.date, amount: form.value.amount, category: form.value.category, note: form.value.note, by: form.value.by, team: team.value }).then(function () {
             saving.value = false;
             var moved = newMonth !== month.value;
             cancelEdit();
@@ -944,10 +993,10 @@ if (!window.Vue) {
         var tmpId = null;
         if (String(form.value.date).slice(0, 7) === month.value) {
           tmpId = 'tmp-' + Date.now();
-          items.value.unshift({ id: tmpId, date: form.value.date, amount: Number(form.value.amount), category: form.value.category, note: form.value.note, by: form.value.by });
+          items.value.unshift({ id: tmpId, date: form.value.date, amount: Number(form.value.amount), category: form.value.category, note: form.value.note, by: form.value.by, team: team.value });
           recomputeSummary();
         }
-        call('addExpense', token.value, { date: form.value.date, amount: form.value.amount, category: form.value.category, note: form.value.note, by: form.value.by }).then(function () {
+        call('addExpense', token.value, { date: form.value.date, amount: form.value.amount, category: form.value.category, note: form.value.note, by: form.value.by, team: team.value }).then(function () {
           saving.value = false;
           form.value.amount = '';
           form.value.note = '';
@@ -969,7 +1018,7 @@ if (!window.Vue) {
       function loadReport() {
         reportLoading.value = true;
         reportErr.value = '';
-        call('getReport', token.value, reportType.value, reportRef.value, 0, 50).then(function (r) {
+        call('getReport', token.value, reportType.value, reportRef.value, 0, 50, '', reportTeam.value).then(function (r) {
           report.value = r;
           reportLoading.value = false;
         }).catch(function (e) { reportLoading.value = false; if (String(e).indexOf('token') !== -1) { clearSession(); return; } reportErr.value = e || 'Gagal memuat laporan.'; });
@@ -980,7 +1029,7 @@ if (!window.Vue) {
         if (report.value.items.length >= report.value.itemsTotal) return;
         reportLoading.value = true;
         var last = report.value.items[report.value.items.length - 1];
-        call('getReport', token.value, reportType.value, reportRef.value, report.value.items.length, 50, last ? last.id : '').then(function (r) {
+        call('getReport', token.value, reportType.value, reportRef.value, report.value.items.length, 50, last ? last.id : '', reportTeam.value).then(function (r) {
           var seen = {};
           report.value.items.forEach(function (it) { seen[String(it.id)] = true; });
           (r.items || []).forEach(function (it) {
@@ -995,7 +1044,7 @@ if (!window.Vue) {
         pdfBusy.value = true;
         pdfErr.value = '';
         // v9.1: laporan di layar hanya halaman pertama; PDF butuh SEMUA item.
-        call('getReport', token.value, reportType.value, reportRef.value, 0, 0).then(function (full) {
+        call('getReport', token.value, reportType.value, reportRef.value, 0, 0, '', reportTeam.value).then(function (full) {
         try {
           var rep = full;
           var doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
@@ -1069,12 +1118,55 @@ if (!window.Vue) {
             doc.autoTable(opts);
             return doc.lastAutoTable.finalY + 10;
           }
+          // v9.7: Analisa sederhana - dari data penuh rep (bukan report.value
+          // yang ter-paging). Kategori terbesar, Team terbesar, rata-rata
+          // per hari, transaksi terbesar.
+          var anaLines = [];
+          if (rep.total > 0) {
+            var bc = (rep.perCategory && rep.perCategory[0]) || null;
+            if (bc) anaLines.push(['Kategori terbesar', bc.name + ' - Rp' + fmt(bc.amount) + ' (' + Math.round(bc.amount / rep.total * 100) + '%)']);
+            var bt = null;
+            (rep.perTeam || []).forEach(function (t) { if (!bt || t.amount > bt.amount) bt = t; });
+            // v9.7: baris Team terbesar disembunyikan bila laporan disaring
+            // ke satu team (perbandingan 3 team hanya bermakna untuk
+            // seluruh periode); tabel Per Team di PDF tetap menampilkan
+            // ketiganya.
+            if (!reportTeam.value && bt && bt.amount > 0) anaLines.push(['Team terbesar', bt.name + ' - Rp' + fmt(bt.amount) + ' (' + Math.round(bt.amount / rep.total * 100) + '%)']);
+            var anaDays = 1;
+            if (reportType.value === '7hari') anaDays = 7;
+            else if (reportType.value === 'bulanan') { var aq = String(reportRef.value).split('-'); anaDays = new Date(Number(aq[0]), Number(aq[1]), 0).getDate(); }
+            else if (reportType.value === 'tahunan') { var ay = Number(reportRef.value); anaDays = (new Date(ay, 1, 29).getMonth() === 1) ? 366 : 365; }
+            anaLines.push(['Rata-rata per hari', 'Rp' + fmt(Math.round(rep.total / anaDays))]);
+            if (rep.biggest) anaLines.push(['Transaksi terbesar', shortDate(rep.biggest.date) + ' - ' + (rep.biggest.note || rep.biggest.category) + ' - Rp' + fmt(rep.biggest.amount)]);
+          }
+          if (anaLines.length) {
+            y = sectionTitle('Analisa', y);
+            y = nextTable(Object.assign({}, tableOpts, {
+              head: [['Analisa', 'Nilai']],
+              body: anaLines,
+              columnStyles: { 0: { cellWidth: W * 0.35 }, 1: { cellWidth: W * 0.65 } }
+            }), y);
+          }
           if (rep.perCategory && rep.perCategory.length) {
             y = sectionTitle('Per Kategori', y);
             y = nextTable(Object.assign({}, tableOpts, {
               head: [['Kategori', 'Transaksi', 'Jumlah (Rp)']],
               body: rep.perCategory.map(function (c) { return [c.name, String(c.count), fmt(c.amount)]; }),
               foot: [['Total', String(rep.count), fmt(rep.total)]],
+              columnStyles: { 0: { cellWidth: W * 0.55 }, 1: { halign: 'center', cellWidth: W * 0.18 }, 2: { halign: 'right', cellWidth: W * 0.27 } }
+            }), y);
+          }
+          // v9.7: Per Team - dari SELURUH periode (sebelum filter Team),
+          // jadi kaki tabel = total periode, bukan total yang disaring.
+          if (rep.perTeam && rep.perTeam.length) {
+            var ptTotal = 0;
+            var ptCount = 0;
+            rep.perTeam.forEach(function (t) { ptTotal += t.amount; ptCount += t.count; });
+            y = sectionTitle('Per Team', y);
+            y = nextTable(Object.assign({}, tableOpts, {
+              head: [['Team', 'Transaksi', 'Jumlah (Rp)']],
+              body: rep.perTeam.map(function (t) { return [t.name, String(t.count), fmt(t.amount)]; }),
+              foot: [['Total', String(ptCount), fmt(ptTotal)]],
               columnStyles: { 0: { cellWidth: W * 0.55 }, 1: { halign: 'center', cellWidth: W * 0.18 }, 2: { halign: 'right', cellWidth: W * 0.27 } }
             }), y);
           }
@@ -1092,10 +1184,10 @@ if (!window.Vue) {
             y = sectionTitle('Detail Transaksi', y);
             var sorted = rep.items.slice().sort(function (a, b) { return String(a.date) < String(b.date) ? -1 : 1; });
             y = nextTable(Object.assign({}, tableOpts, {
-              head: [['Tanggal', 'Kategori', 'Keterangan', 'Jumlah (Rp)']],
-              body: sorted.map(function (it) { return [shortDate(it.date), it.category, it.note || '-', fmt(it.amount)]; }),
-              foot: [['', '', 'Total', fmt(rep.total)]],
-              columnStyles: { 0: { cellWidth: 28 }, 1: { cellWidth: 34 }, 2: { cellWidth: 'auto' }, 3: { halign: 'right', cellWidth: 30 } }
+              head: [['Tanggal', 'Team', 'Kategori', 'Keterangan', 'Jumlah (Rp)']],
+              body: sorted.map(function (it) { return [shortDate(it.date), it.team || 'Team 1', it.category, it.note || '-', fmt(it.amount)]; }),
+              foot: [['', '', '', 'Total', fmt(rep.total)]],
+              columnStyles: { 0: { cellWidth: 24 }, 1: { cellWidth: 18 }, 2: { cellWidth: 30 }, 3: { cellWidth: 'auto' }, 4: { halign: 'right', cellWidth: 28 } }
             }), y);
           }
           if ((!rep.perCategory || !rep.perCategory.length) && !rep.items.length) {
@@ -1116,7 +1208,7 @@ if (!window.Vue) {
       VueApi.onMounted(function () {
         if (token.value) { loggedIn.value = true; boot(); }
       });
-      return { loggedIn: loggedIn, pw: pw, loginBusy: loginBusy, loginErr: loginErr, tab: tab, tabTitle: tabTitle, month: month, monthLabel: monthLabel, summary: summary, catList: catList, items: items, filteredItems: filteredItems, recentItems: recentItems, groupedItems: groupedItems, categories: categories, search: search, filterCat: filterCat, editingId: editingId, loading: loading, editingCat: editingCat, editCatName: editCatName, newCatName: newCatName, catErr: catErr, confirmDelete: confirmDelete, deleting: deleting, monthCompare: monthCompare, autoRules: autoRules, autoForm: autoForm, editingAuto: editingAuto, autoErr: autoErr, autoSaving: autoSaving, autoRunning: autoRunning, weekDays: weekDays, form: form, saving: saving, saveErr: saveErr, listErr: listErr, historyLimit: historyLimit, historyNote: historyNote, visibleReportItems: visibleReportItems, toast: toast, reportType: reportType, reportRef: reportRef, report: report, reportLoading: reportLoading, reportErr: reportErr, pdfBusy: pdfBusy, pdfErr: pdfErr, loadErr: loadErr, theme: theme, toggleTheme: toggleTheme, rupiah: rupiah, catColor: catColor, catIconHtml: catIconHtml, dayLabel: dayLabel, shortDate: shortDate, barWidth: barWidth, autoFreqText: autoFreqText, doLogin: doLogin, doLogout: doLogout, installApp: installApp, showInstallBtn: showInstallBtn, refresh: refresh, switchTab: switchTab, goAdd: goAdd, startEdit: startEdit, cancelEdit: cancelEdit, downloadCsv: downloadCsv, startCatEdit: startCatEdit, cancelCatEdit: cancelCatEdit, saveCatEdit: saveCatEdit, addCat: addCat, deleteCat: deleteCat, saveAuto: saveAuto, startAutoEdit: startAutoEdit, cancelAutoEdit: cancelAutoEdit, deleteAuto: deleteAuto, runAutoNow: runAutoNow, doSave: doSave, doDelete: doDelete, cancelDelete: cancelDelete, confirmDeleteYes: confirmDeleteYes, onReportType: onReportType, loadReport: loadReport, loadMoreReport: loadMoreReport, downloadPdf: downloadPdf };
+      return { loggedIn: loggedIn, pw: pw, loginBusy: loginBusy, loginErr: loginErr, tab: tab, tabTitle: tabTitle, month: month, monthLabel: monthLabel, summary: summary, catList: catList, items: items, filteredItems: filteredItems, recentItems: recentItems, groupedItems: groupedItems, categories: categories, search: search, filterCat: filterCat, filterTeam: filterTeam, reportTeam: reportTeam, analysis: analysis, editingId: editingId, loading: loading, editingCat: editingCat, editCatName: editCatName, newCatName: newCatName, catErr: catErr, confirmDelete: confirmDelete, deleting: deleting, monthCompare: monthCompare, autoRules: autoRules, autoForm: autoForm, editingAuto: editingAuto, autoErr: autoErr, autoSaving: autoSaving, autoRunning: autoRunning, weekDays: weekDays, form: form, team: team, saving: saving, saveErr: saveErr, listErr: listErr, historyLimit: historyLimit, historyNote: historyNote, visibleReportItems: visibleReportItems, toast: toast, reportType: reportType, reportRef: reportRef, report: report, reportLoading: reportLoading, reportErr: reportErr, pdfBusy: pdfBusy, pdfErr: pdfErr, loadErr: loadErr, theme: theme, toggleTheme: toggleTheme, rupiah: rupiah, catColor: catColor, catIconHtml: catIconHtml, dayLabel: dayLabel, shortDate: shortDate, barWidth: barWidth, autoFreqText: autoFreqText, doLogin: doLogin, doLogout: doLogout, installApp: installApp, showInstallBtn: showInstallBtn, refresh: refresh, switchTab: switchTab, goAdd: goAdd, startEdit: startEdit, cancelEdit: cancelEdit, downloadCsv: downloadCsv, startCatEdit: startCatEdit, cancelCatEdit: cancelCatEdit, saveCatEdit: saveCatEdit, addCat: addCat, deleteCat: deleteCat, saveAuto: saveAuto, startAutoEdit: startAutoEdit, cancelAutoEdit: cancelAutoEdit, deleteAuto: deleteAuto, runAutoNow: runAutoNow, doSave: doSave, doDelete: doDelete, cancelDelete: cancelDelete, confirmDeleteYes: confirmDeleteYes, onReportType: onReportType, loadReport: loadReport, loadMoreReport: loadMoreReport, downloadPdf: downloadPdf };
     }
   }).mount('#app');
 }
