@@ -1,6 +1,6 @@
 /* Inputin PWA - service worker (cache app shell saja, API tidak pernah di-cache).
    Naikkan CACHE saat ada update frontend supaya shell lama terbuang. */
-var CACHE = 'inputin-v9';
+var CACHE = 'inputin-v10';
 var SHELL = ['.', 'index.html', 'manifest.json', 'icon-48.png', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', function (e) {

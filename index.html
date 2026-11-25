@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Inputin - Catatan Pengeluaran v9.8-pages -->
+<!-- Inputin - Catatan Pengeluaran v9.9-pages -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -193,6 +193,12 @@ html.dark .amount-box, html.dark .field { background: var(--track); border-color
 html.dark .amount-box:focus-within, html.dark .field:focus { box-shadow: 0 0 0 3px rgba(47,110,166,.25); }
 html.dark .section-title .link-btn { color: #FFD166; }
 
+
+  /* UI v9.9 - Kelola Kategori: tombol Ubah/Hapus sejajar nama (25 Nov 2026) */
+  .cats-row { flex-wrap: nowrap; }
+  .cats-row .tx-actions { flex-basis: auto; margin-top: 0; flex-shrink: 0; }
+  .cats-row .cat { white-space: normal; line-height: 1.25; }
+
 </style>
 </head>
 <body>
@@ -299,7 +305,7 @@ html.dark .section-title .link-btn { color: #FFD166; }
 
       <section v-if="tab === 'cats'">
         <div class="card">
-          <div class="tx" v-for="c in categories" :key="c">
+          <div class="tx cats-row" v-for="c in categories" :key="c">
             <div class="icon" :style="{ background: catColor(c) }" v-html="catIconHtml(c)"></div>
             <div class="info" v-if="editingCat === c"><input class="field" v-model="editCatName" placeholder="Nama kategori"></div>
             <div class="info" v-else><div class="cat">{{ c }}</div></div>
