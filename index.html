@@ -1131,8 +1131,7 @@ if (!window.Vue) {
             (rep.perTeam || []).forEach(function (t) { if (!bt || t.amount > bt.amount) bt = t; });
             // v9.7: baris Team terbesar disembunyikan bila laporan disaring
             // ke satu team (perbandingan 3 team hanya bermakna untuk
-            // seluruh periode); tabel Per Team di PDF tetap menampilkan
-            // ketiganya.
+            // seluruh periode); tabel Per Team di PDF ikut tersaring.
             if (!reportTeam.value && bt && bt.amount > 0) anaLines.push(['Team terbesar', bt.name + ' - Rp' + fmt(bt.amount) + ' (' + Math.round(bt.amount / rep.total * 100) + '%)']);
             var anaDays = 1;
             if (reportType.value === '7hari') anaDays = 7;
@@ -1158,16 +1157,18 @@ if (!window.Vue) {
               columnStyles: { 0: { cellWidth: W * 0.55 }, 1: { halign: 'center', cellWidth: W * 0.18 }, 2: { halign: 'right', cellWidth: W * 0.27 } }
             }), y);
           }
-          // v9.7: Per Team - dari SELURUH periode (sebelum filter Team),
-          // jadi kaki tabel = total periode, bukan total yang disaring.
-          if (rep.perTeam && rep.perTeam.length) {
+          // v9.7: Per Team - tanpa saringan tampil ketiganya (total periode);
+          // bila disaring ke satu team, tampil team itu saja supaya PDF
+          // hanya berisi team yang dipilih (total = total PDF).
+          var ptRows = (rep.perTeam || []).filter(function (t) { return !reportTeam.value || t.name === reportTeam.value; });
+          if (ptRows.length) {
             var ptTotal = 0;
             var ptCount = 0;
-            rep.perTeam.forEach(function (t) { ptTotal += t.amount; ptCount += t.count; });
+            ptRows.forEach(function (t) { ptTotal += t.amount; ptCount += t.count; });
             y = sectionTitle('Per Team', y);
             y = nextTable(Object.assign({}, tableOpts, {
               head: [['Team', 'Transaksi', 'Jumlah (Rp)']],
-              body: rep.perTeam.map(function (t) { return [t.name, String(t.count), fmt(t.amount)]; }),
+              body: ptRows.map(function (t) { return [t.name, String(t.count), fmt(t.amount)]; }),
               foot: [['Total', String(ptCount), fmt(ptTotal)]],
               columnStyles: { 0: { cellWidth: W * 0.55 }, 1: { halign: 'center', cellWidth: W * 0.18 }, 2: { halign: 'right', cellWidth: W * 0.27 } }
             }), y);
