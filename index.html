@@ -1104,7 +1104,9 @@ if (!window.Vue) {
             doc.setFontSize(8);
             doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
             doc.text('Catatan Pengeluaran  -  Dicetak ' + printed, margin, doc.internal.pageSize.getHeight() - 8);
-            doc.text('Halaman ' + d.pageNumber + ' dari {total}', pageW - margin, doc.internal.pageSize.getHeight() - 8, { align: 'right' });
+            // v9.7: d.pageNumber = nomor halaman DI DALAM tabel (selalu 1 bila
+            // tabel muat 1 halaman); nomor halaman dokumen = getNumberOfPages().
+            doc.text('Halaman ' + doc.internal.getNumberOfPages() + ' dari {total}', pageW - margin, doc.internal.pageSize.getHeight() - 8, { align: 'right' });
           } };
           function sectionTitle(t, yy) {
             doc.setFont('helvetica', 'bold');
