@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Inputin - Catatan Pengeluaran v10.1-pages (redesign UI/UX) -->
+<!-- Inputin - Catatan Pengeluaran v10.2-pages (redesign UI/UX) -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -303,6 +303,10 @@ try {
   .filter-line .chip-scroll { flex: 1 1 100%; }
   .filter-line select.field { flex: 1 1 100%; max-width: none; margin-top: 8px; }
 
+
+  /* UI v10.2 - badge versi di Beranda (26 Nov 2026) */
+  .topbar h1 .ver { font-size: 11px; font-weight: 700; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; vertical-align: middle; margin-left: 6px; letter-spacing: 0; white-space: nowrap; }
+
 </style>
 </head>
 <body>
@@ -346,7 +350,7 @@ try {
       <div class="topbar-in">
         <button v-if="tab === 'cats' || tab === 'auto'" class="icon-btn flat back" aria-label="Kembali" @click="switchTab('more')"><svg class="ic"><use href="#i-left"/></svg></button>
         <div class="grow">
-          <h1>{{ tabTitle }}</h1>
+          <h1>{{ tabTitle }}<span class="ver" v-if="tab === 'home'">v10.2</span></h1>
           <div class="sub" v-if="tab === 'home'">{{ monthLabel }}</div>
         </div>
         <button v-if="tab === 'add' && editingId" class="btn btn-soft btn-sm" @click="cancelEdit(); switchTab('history')">Batal</button>
