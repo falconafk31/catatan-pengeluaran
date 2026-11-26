@@ -41,10 +41,10 @@ Frontend dan backend terpisah penuh: frontend tidak menyimpan data, semua baca/t
 
 - Satu file `index.html` (Vue 3 lewat CDN, tanpa build step).
 - PDF laporan dibuat di sisi klien dengan jsPDF 2.5.1 + jspdf-autotable 3.8.2.
-- `manifest.json` + `sw.js`: PWA installable; service worker cache-first untuk shell aplikasi saja (API dan CDN selalu network). Nama cache saat ini: `inputin-v10`. **Setiap deploy yang mengubah `index.html` wajib menaikkan nama cache di `sw.js`**, kalau tidak PWA terpasang terus menyajikan tampilan lama.
+- `manifest.json` + `sw.js`: PWA installable; service worker cache-first untuk shell aplikasi saja (API dan CDN selalu network). Nama cache saat ini: `inputin-v11`. **Setiap deploy yang mengubah `index.html` wajib menaikkan nama cache di `sw.js`**, kalau tidak PWA terpasang terus menyajikan tampilan lama.
 - Mobile-first, lebar acuan 390px; tampilan gelap/terang lewat variabel CSS di `:root` dan `html.dark`.
-- UI v9.8 "Navy Modern": ikon navigasi dan kategori garis tipis gaya Lucide, ikon kategori di lingkaran pastel, kartu radius 20px, tombol pil penuh, identitas navy dipertahankan.
-- Versi frontend saat ini: **v9.9-pages**.
+- UI v10.0 (redesign Claude, 26 Nov 2026): navigasi bawah 5 tab (Beranda, Riwayat, tombol + tengah, Laporan, Lainnya); form Tambah memakai keypad angka; Beranda memakai kartu hero gradasi biru + diagram batang "Ke mana uangnya pergi"; Kelola Kategori dan Transaksi Otomatis pindah ke tab Lainnya; font Plus Jakarta Sans (Google Fonts, fallback font sistem bila gagal dimuat).
+- Versi frontend saat ini: **v10.0-pages**.
 
 ### Backend (API)
 
@@ -120,6 +120,7 @@ icon-512.png    Ikon PWA 512px
 | v9.7-pages | 25 Nov 2026 | Fitur Team + Analisa; perbaikan kolom Team di updateExpense |
 | v9.8-pages | 25 Nov 2026 | UI "Navy Modern" (ikon Lucide, chip pastel, tombol pil) |
 | v9.9-pages | 25 Nov 2026 | Kelola Kategori: tombol Ubah/Hapus sejajar nama kategori |
+| v10.0-pages | 26 Nov 2026 | Redesign UI/UX (Claude): nav 5 tab + tombol +, keypad Tambah, hero gradasi biru, tab Lainnya, font Plus Jakarta Sans; nama kategori panjang tetap 2 baris (perbaikan v9.9 dipertahankan) |
 
 ## Catatan keamanan
 
