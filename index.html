@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Inputin - Catatan Pengeluaran v10.2-pages (redesign UI/UX) -->
+<!-- Inputin - Catatan Pengeluaran v10.3-pages (redesign UI/UX) -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -305,7 +305,17 @@ try {
 
 
   /* UI v10.2 - badge versi di Beranda (26 Nov 2026) */
+  /* UI v10.3 - pilih ikon kategori, simpan di localStorage (26 Nov 2026) */
   .topbar h1 .ver { font-size: 11px; font-weight: 700; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; vertical-align: middle; margin-left: 6px; letter-spacing: 0; white-space: nowrap; }
+
+
+  /* UI v10.3 - pilih ikon kategori, simpan di localStorage (26 Nov 2026) */
+  .cats-row { flex-wrap: wrap; }
+  .icon-pick { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin: 8px 0 2px; }
+  .icon-pick .ipick { height: 40px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; color: var(--ink); }
+  .icon-pick .ipick svg { width: 22px; height: 22px; }
+  .icon-pick .ipick.on { border: 2px solid var(--brand); background: var(--brand-soft); }
+  .icon-pick-wrap { flex-basis: 100%; margin-top: 10px; }
 
 </style>
 </head>
@@ -350,7 +360,7 @@ try {
       <div class="topbar-in">
         <button v-if="tab === 'cats' || tab === 'auto'" class="icon-btn flat back" aria-label="Kembali" @click="switchTab('more')"><svg class="ic"><use href="#i-left"/></svg></button>
         <div class="grow">
-          <h1>{{ tabTitle }}<span class="ver" v-if="tab === 'home'">v10.2</span></h1>
+          <h1>{{ tabTitle }}<span class="ver" v-if="tab === 'home'">v10.3</span></h1>
           <div class="sub" v-if="tab === 'home'">{{ monthLabel }}</div>
         </div>
         <button v-if="tab === 'add' && editingId" class="btn btn-soft btn-sm" @click="cancelEdit(); switchTab('history')">Batal</button>
@@ -517,11 +527,21 @@ try {
               <button class="btn btn-soft btn-sm" @click="startCatEdit(c)">Ubah</button>
               <button class="btn btn-danger-soft btn-sm" @click="deleteCat(c)">Hapus</button>
             </template>
+            <div class="icon-pick-wrap" v-if="editingCat === c">
+              <div style="font-size:12px;font-weight:700;color:var(--muted)">Ikon</div>
+              <div class="icon-pick">
+                <button type="button" class="ipick" :class="{on: editCatIcon === k}" v-for="(p, k) in ICON_PATHS" :key="k" @click="editCatIcon = k" v-html="iconSvg(k)"></button>
+              </div>
+            </div>
           </div>
         </div>
         <div class="card" style="margin-top:14px">
           <label class="lbl" style="margin-top:0">Kategori baru</label>
           <input type="text" class="field" v-model="newCatName" placeholder="contoh: Langganan" @keyup.enter="addCat">
+          <label class="lbl">Ikon</label>
+          <div class="icon-pick">
+            <button type="button" class="ipick" :class="{on: newCatIcon === k}" v-for="(p, k) in ICON_PATHS" :key="k" @click="newCatIcon = k" v-html="iconSvg(k)"></button>
+          </div>
           <button class="btn btn-primary btn-block" @click="addCat">Tambah kategori</button>
           <div class="err" v-if="catErr">{{ catErr }}</div>
         </div>
@@ -851,6 +871,36 @@ if (!window.Vue) {
       var editCatName = VueApi.ref('');
       var newCatName = VueApi.ref('');
       var catErr = VueApi.ref('');
+      var ICON_PATHS = {
+      'home': '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+      'car': '<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',
+      'bag': '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
+      'utensils': '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
+      'zap': '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+      'phone': '<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>',
+      'shirt': '<path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>',
+      'pill': '<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>',
+      'film': '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 3v18"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/>',
+      'book': '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+      'fuel': '<line x1="3" x2="15" y1="22" y2="22"/><line x1="4" x2="14" y1="9" y2="9"/><path d="M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0V9.83a2 2 0 0 0-.59-1.42L18 5"/>',
+      'droplet': '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
+      'wrench': '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+      'gift': '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/>',
+      'plane': '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>',
+      'gradcap': '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>',
+      'fish': '<path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.47-3.44 6-7 6s-7.56-2.53-8.5-6Z"/><path d="M18 12v.5"/><path d="M16 17.93a9.77 9.77 0 0 1 0-11.86"/><path d="M7 10.67C7 8 5.58 5.8 2.5 5 2.5 8.46 4.09 10.5 7 10.67Z"/>',
+      'coffee': '<path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6" y1="2" y2="4"/><line x1="10" x2="10" y1="2" y2="4"/><line x1="14" x2="14" y1="2" y2="4"/>',
+      'wallet': '<path d="M3 7a2 2 0 0 1 2-2h13v4"/><path d="M3 7v11a2 2 0 0 0 2 2h15V9H5a2 2 0 0 1-2-2z"/><circle cx="16.5" cy="14.5" r="1"/>',
+      'music': '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+      'briefcase': '<rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+      'heart': '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+      'banknote': '<rect width="20" height="12" x="2" y="6" rx="2" ry="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>',
+      'bus': '<path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/>'
+    };
+      var catIcons = VueApi.ref({});
+      try { catIcons.value = JSON.parse(localStorage.getItem('cp_cat_icons') || '{}') || {}; } catch (e) {}
+      var newCatIcon = VueApi.ref('');
+      var editCatIcon = VueApi.ref('');
       var autoRules = VueApi.ref([]);
       var autoForm = VueApi.ref({ name: '', amount: '', category: '', note: '', freq: 'Bulanan', day: 1, active: true });
       var editingAuto = VueApi.ref(null);
@@ -922,10 +972,19 @@ if (!window.Vue) {
         for (var i = 0; i < c.length; i++) h = (h * 31 + c.charCodeAt(i)) >>> 0;
         return CAT_PALETTE[h % CAT_PALETTE.length];
       }
+      function iconSvg(k, color) {
+        var p = ICON_PATHS[k];
+        if (!p) return '';
+        return '<svg viewBox="0 0 24 24" fill="none" stroke="' + (color || 'currentColor') + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg>';
+      }
       function catIconHtml(c) {
+        var m = catIcons.value || {};
+        var key = m[c];
+        if (key && ICON_PATHS[key]) return iconSvg(key, CAT_STRONG[c] || '#fff');
         if (CAT_ICONS[c]) return CAT_ICONS[c];
         return (c || '?').charAt(0);
       }
+      function saveCatIcons() { try { localStorage.setItem('cp_cat_icons', JSON.stringify(catIcons.value)); } catch (e) {} }
       var MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
       function shortDate(s) {
         if (!s) return '';
@@ -1124,11 +1183,13 @@ if (!window.Vue) {
       function startCatEdit(c) {
         editingCat.value = c;
         editCatName.value = c;
+        editCatIcon.value = (catIcons.value || {})[c] || '';
         catErr.value = '';
       }
       function cancelCatEdit() {
         editingCat.value = null;
         editCatName.value = '';
+        editCatIcon.value = '';
       }
       function saveCatEdit() {
         var oldName = editingCat.value;
@@ -1136,6 +1197,9 @@ if (!window.Vue) {
         catErr.value = '';
         if (!oldName || !name) return;
         call('renameCategory', token.value, oldName, name).then(function () {
+          if (editCatIcon.value) { catIcons.value[name] = editCatIcon.value; } else { delete catIcons.value[name]; }
+          if (name !== oldName) delete catIcons.value[oldName];
+          saveCatIcons();
           cancelCatEdit();
           if (filterCat.value === oldName) filterCat.value = name;
           showToast('Kategori diubah.');
@@ -1147,8 +1211,11 @@ if (!window.Vue) {
         var name = (newCatName.value || '').trim();
         catErr.value = '';
         if (!name) return;
+        var icon = newCatIcon.value;
         call('addCategory', token.value, name).then(function () {
+          if (icon) { catIcons.value[name] = icon; saveCatIcons(); }
           newCatName.value = '';
+          newCatIcon.value = '';
           showToast('Kategori ditambah.');
           loadCategories();
         }).catch(function (e) { catErr.value = e || 'Gagal menambah kategori.'; });
@@ -1163,7 +1230,7 @@ if (!window.Vue) {
         deleting.value = true;
         if (d.kind === 'category') {
           catErr.value = '';
-          call('deleteCategory', token.value, d.id).then(function () { if (filterCat.value === d.id) filterCat.value = ''; showToast('Kategori dihapus.'); loadCategories(); }).catch(function (e) { catErr.value = e || 'Gagal menghapus kategori.'; }).finally(function () { deleting.value = false; confirmDelete.value = null; });
+          call('deleteCategory', token.value, d.id).then(function () { delete catIcons.value[d.id]; saveCatIcons(); if (filterCat.value === d.id) filterCat.value = ''; showToast('Kategori dihapus.'); loadCategories(); }).catch(function (e) { catErr.value = e || 'Gagal menghapus kategori.'; }).finally(function () { deleting.value = false; confirmDelete.value = null; });
         } else if (d.kind === 'auto') {
           autoErr.value = '';
           call('deleteAutoRule', token.value, d.id).then(function () { showToast('Aturan dihapus.'); loadAutoRules(); }).catch(function (e) { autoErr.value = e || 'Gagal menghapus aturan.'; }).finally(function () { deleting.value = false; confirmDelete.value = null; });
@@ -1543,7 +1610,7 @@ if (!window.Vue) {
       VueApi.onMounted(function () {
         if (token.value) { loggedIn.value = true; boot(); }
       });
-      return { catStrong: catStrong, pctOf: pctOf, expandedId: expandedId, toggleTx: toggleTx, showMore: showMore, shiftMonth: shiftMonth, shiftReport: shiftReport, keyPress: keyPress, keyDel: keyDel, keyClear: keyClear, amountText: amountText, animTotal: animTotal, todayStr: todayStr, yesterdayStr: yesterdayStr, loggedIn: loggedIn, pw: pw, loginBusy: loginBusy, loginErr: loginErr, tab: tab, tabTitle: tabTitle, month: month, monthLabel: monthLabel, summary: summary, catList: catList, items: items, filteredItems: filteredItems, recentItems: recentItems, groupedItems: groupedItems, categories: categories, search: search, filterCat: filterCat, filterTeam: filterTeam, reportTeam: reportTeam, analysis: analysis, editingId: editingId, loading: loading, editingCat: editingCat, editCatName: editCatName, newCatName: newCatName, catErr: catErr, confirmDelete: confirmDelete, deleting: deleting, monthCompare: monthCompare, autoRules: autoRules, autoForm: autoForm, editingAuto: editingAuto, autoErr: autoErr, autoSaving: autoSaving, autoRunning: autoRunning, weekDays: weekDays, form: form, team: team, saving: saving, saveErr: saveErr, listErr: listErr, historyLimit: historyLimit, historyNote: historyNote, visibleReportItems: visibleReportItems, toast: toast, reportType: reportType, reportRef: reportRef, report: report, reportLoading: reportLoading, reportErr: reportErr, pdfBusy: pdfBusy, pdfErr: pdfErr, loadErr: loadErr, theme: theme, toggleTheme: toggleTheme, rupiah: rupiah, catColor: catColor, catIconHtml: catIconHtml, dayLabel: dayLabel, shortDate: shortDate, barWidth: barWidth, autoFreqText: autoFreqText, doLogin: doLogin, doLogout: doLogout, installApp: installApp, showInstallBtn: showInstallBtn, refresh: refresh, switchTab: switchTab, goAdd: goAdd, startEdit: startEdit, cancelEdit: cancelEdit, downloadCsv: downloadCsv, startCatEdit: startCatEdit, cancelCatEdit: cancelCatEdit, saveCatEdit: saveCatEdit, addCat: addCat, deleteCat: deleteCat, saveAuto: saveAuto, startAutoEdit: startAutoEdit, cancelAutoEdit: cancelAutoEdit, deleteAuto: deleteAuto, runAutoNow: runAutoNow, doSave: doSave, doDelete: doDelete, cancelDelete: cancelDelete, confirmDeleteYes: confirmDeleteYes, onReportType: onReportType, loadReport: loadReport, loadMoreReport: loadMoreReport, downloadPdf: downloadPdf };
+      return { catStrong: catStrong, pctOf: pctOf, expandedId: expandedId, toggleTx: toggleTx, showMore: showMore, shiftMonth: shiftMonth, shiftReport: shiftReport, keyPress: keyPress, keyDel: keyDel, keyClear: keyClear, amountText: amountText, animTotal: animTotal, todayStr: todayStr, yesterdayStr: yesterdayStr, loggedIn: loggedIn, pw: pw, loginBusy: loginBusy, loginErr: loginErr, tab: tab, tabTitle: tabTitle, month: month, monthLabel: monthLabel, summary: summary, catList: catList, items: items, filteredItems: filteredItems, recentItems: recentItems, groupedItems: groupedItems, categories: categories, search: search, filterCat: filterCat, filterTeam: filterTeam, reportTeam: reportTeam, analysis: analysis, editingId: editingId, loading: loading, editingCat: editingCat, editCatName: editCatName, newCatName: newCatName, catErr: catErr, confirmDelete: confirmDelete, deleting: deleting, monthCompare: monthCompare, autoRules: autoRules, autoForm: autoForm, editingAuto: editingAuto, autoErr: autoErr, autoSaving: autoSaving, autoRunning: autoRunning, weekDays: weekDays, form: form, team: team, saving: saving, saveErr: saveErr, listErr: listErr, historyLimit: historyLimit, historyNote: historyNote, visibleReportItems: visibleReportItems, toast: toast, reportType: reportType, reportRef: reportRef, report: report, reportLoading: reportLoading, reportErr: reportErr, pdfBusy: pdfBusy, pdfErr: pdfErr, loadErr: loadErr, theme: theme, toggleTheme: toggleTheme, rupiah: rupiah, catColor: catColor, catIconHtml: catIconHtml, iconSvg: iconSvg, ICON_PATHS: ICON_PATHS, newCatIcon: newCatIcon, editCatIcon: editCatIcon, dayLabel: dayLabel, shortDate: shortDate, barWidth: barWidth, autoFreqText: autoFreqText, doLogin: doLogin, doLogout: doLogout, installApp: installApp, showInstallBtn: showInstallBtn, refresh: refresh, switchTab: switchTab, goAdd: goAdd, startEdit: startEdit, cancelEdit: cancelEdit, downloadCsv: downloadCsv, startCatEdit: startCatEdit, cancelCatEdit: cancelCatEdit, saveCatEdit: saveCatEdit, addCat: addCat, deleteCat: deleteCat, saveAuto: saveAuto, startAutoEdit: startAutoEdit, cancelAutoEdit: cancelAutoEdit, deleteAuto: deleteAuto, runAutoNow: runAutoNow, doSave: doSave, doDelete: doDelete, cancelDelete: cancelDelete, confirmDeleteYes: confirmDeleteYes, onReportType: onReportType, loadReport: loadReport, loadMoreReport: loadMoreReport, downloadPdf: downloadPdf };
     }
   }).mount('#app');
 }
