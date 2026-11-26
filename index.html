@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Inputin - Catatan Pengeluaran v10.0-pages (redesign UI/UX) -->
+<!-- Inputin - Catatan Pengeluaran v10.1-pages (redesign UI/UX) -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -296,6 +296,12 @@ try {
 
   /* UI v10.0 - pertahankan perbaikan v9.9: nama kategori panjang boleh 2 baris */
   .cats-row .ttl { white-space: normal; line-height: 1.25; }
+
+
+  /* UI v10.1 - Riwayat: filter kategori pindah ke bawah (26 Nov 2026) */
+  .filter-line { flex-wrap: wrap; }
+  .filter-line .chip-scroll { flex: 1 1 100%; }
+  .filter-line select.field { flex: 1 1 100%; max-width: none; margin-top: 8px; }
 
 </style>
 </head>

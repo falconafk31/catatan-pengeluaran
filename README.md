@@ -41,10 +41,11 @@ Frontend dan backend terpisah penuh: frontend tidak menyimpan data, semua baca/t
 
 - Satu file `index.html` (Vue 3 lewat CDN, tanpa build step).
 - PDF laporan dibuat di sisi klien dengan jsPDF 2.5.1 + jspdf-autotable 3.8.2.
-- `manifest.json` + `sw.js`: PWA installable; service worker cache-first untuk shell aplikasi saja (API dan CDN selalu network). Nama cache saat ini: `inputin-v11`. **Setiap deploy yang mengubah `index.html` wajib menaikkan nama cache di `sw.js`**, kalau tidak PWA terpasang terus menyajikan tampilan lama.
+- `manifest.json` + `sw.js`: PWA installable; service worker cache-first untuk shell aplikasi saja (API dan CDN selalu network). Nama cache saat ini: `inputin-v12`. **Setiap deploy yang mengubah `index.html` wajib menaikkan nama cache di `sw.js`**, kalau tidak PWA terpasang terus menyajikan tampilan lama.
 - Mobile-first, lebar acuan 390px; tampilan gelap/terang lewat variabel CSS di `:root` dan `html.dark`.
 - UI v10.0 (redesign Claude, 26 Nov 2026): navigasi bawah 5 tab (Beranda, Riwayat, tombol + tengah, Laporan, Lainnya); form Tambah memakai keypad angka; Beranda memakai kartu hero gradasi biru + diagram batang "Ke mana uangnya pergi"; Kelola Kategori dan Transaksi Otomatis pindah ke tab Lainnya; font Plus Jakarta Sans (Google Fonts, fallback font sistem bila gagal dimuat).
-- Versi frontend saat ini: **v10.0-pages**.
+- UI v10.1 (26 Nov 2026): Riwayat - filter kategori pindah ke bawah; chip Team satu baris lebar penuh tanpa geser, dropdown kategori lebar penuh di bawahnya.
+- Versi frontend saat ini: **v10.1-pages**.
 
 ### Backend (API)
 
@@ -121,6 +122,7 @@ icon-512.png    Ikon PWA 512px
 | v9.8-pages | 25 Nov 2026 | UI "Navy Modern" (ikon Lucide, chip pastel, tombol pil) |
 | v9.9-pages | 25 Nov 2026 | Kelola Kategori: tombol Ubah/Hapus sejajar nama kategori |
 | v10.0-pages | 26 Nov 2026 | Redesign UI/UX (Claude): nav 5 tab + tombol +, keypad Tambah, hero gradasi biru, tab Lainnya, font Plus Jakarta Sans; nama kategori panjang tetap 2 baris (perbaikan v9.9 dipertahankan) |
+| v10.1-pages | 26 Nov 2026 | Riwayat: filter kategori pindah ke bawah (chip Team lebar penuh, tanpa geser) |
 
 ## Catatan keamanan
 
