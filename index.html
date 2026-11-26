@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Inputin - Catatan Pengeluaran v10.3-pages (redesign UI/UX) -->
+<!-- Inputin - Catatan Pengeluaran v10.4-pages (redesign UI/UX) -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -317,6 +317,24 @@ try {
   .icon-pick .ipick.on { border: 2px solid var(--brand); background: var(--brand-soft); }
   .icon-pick-wrap { flex-basis: 100%; margin-top: 10px; }
 
+
+  /* UI v10.4 - urutan Tambah Claude: Tanggal+Keterangan lipat (26 Nov 2026) */
+  .det-row { display:flex; justify-content:space-between; align-items:center; width:100%; margin-top:12px; padding:13px 16px; background:var(--surface); border:1px solid var(--line); border-radius:14px; font-size:14px; font-weight:600; color:var(--ink); cursor:pointer; text-align:left; }
+  .det-row .det-chev { color:var(--muted); font-size:12px; }
+
+
+  /* UI v10.4 - kategori jadi lembar bawah (26 Nov 2026) */
+  .cat-pick { display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px; background:var(--field); border:1px solid var(--line); border-radius:14px; font-size:14px; font-weight:700; color:var(--ink); cursor:pointer; text-align:left; }
+  .cat-pick .nm { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .cat-pick .chev { color:var(--muted); font-size:12px; }
+  .cat-pick.empty { color:var(--muted); }
+  .sheet-back { position:fixed; inset:0; z-index:80; background:rgba(16,24,40,.45); }
+  .cat-sheet { position:fixed; left:0; right:0; bottom:0; z-index:81; background:var(--surface); border-radius:22px 22px 0 0; padding:12px 16px calc(20px + env(safe-area-inset-bottom)); box-shadow:0 -8px 30px rgba(16,24,40,.18); max-width:600px; margin:0 auto; }
+  .cat-sheet .grab { width:44px; height:5px; border-radius:99px; background:var(--track); margin:0 auto 10px; }
+  .cat-sheet .sh-head { display:flex; align-items:center; justify-content:space-between; margin:2px 2px 12px; }
+  .cat-sheet .sh-title { font-size:16px; font-weight:800; }
+  .cat-sheet .sh-close { border:none; background:transparent; font-size:14px; font-weight:700; color:var(--brand); padding:6px 2px; cursor:pointer; }
+
 </style>
 </head>
 <body>
@@ -360,7 +378,7 @@ try {
       <div class="topbar-in">
         <button v-if="tab === 'cats' || tab === 'auto'" class="icon-btn flat back" aria-label="Kembali" @click="switchTab('more')"><svg class="ic"><use href="#i-left"/></svg></button>
         <div class="grow">
-          <h1>{{ tabTitle }}<span class="ver" v-if="tab === 'home'">v10.3</span></h1>
+          <h1>{{ tabTitle }}<span class="ver" v-if="tab === 'home'">v10.4</span></h1>
           <div class="sub" v-if="tab === 'home'">{{ monthLabel }}</div>
         </div>
         <button v-if="tab === 'add' && editingId" class="btn btn-soft btn-sm" @click="cancelEdit(); switchTab('history')">Batal</button>
@@ -429,16 +447,6 @@ try {
       <!-- TAMBAH / UBAH -->
       <section v-if="tab === 'add'">
         <div class="edit-banner" v-if="editingId" style="margin-bottom:12px"><span>Sedang mengubah transaksi</span></div>
-        <div class="card amount-card">
-          <div class="hint">Jumlah</div>
-          <div class="amount-row" aria-live="polite"><span class="rp">Rp</span><span class="amt-val num" :class="{ empty: !form.amount }">{{ amountText }}</span></div>
-        </div>
-        <div class="keypad" role="group" aria-label="Papan angka">
-          <button v-for="k in ['1','2','3','4','5','6','7','8','9']" :key="k" type="button" class="key" @click="keyPress(k)">{{ k }}</button>
-          <button type="button" class="key alt" @click="keyPress('000')">000</button>
-          <button type="button" class="key" @click="keyPress('0')">0</button>
-          <button type="button" class="key alt" aria-label="Hapus angka terakhir" @click="keyDel" @contextmenu.prevent="keyClear"><svg class="ic"><use href="#i-backspace"/></svg></button>
-        </div>
 
         <div class="card" style="margin-top:14px">
           <label class="lbl" style="margin-top:0">Team</label>
@@ -449,13 +457,34 @@ try {
           </div>
 
           <label class="lbl">Kategori</label>
-          <div class="cat-grid">
-            <button type="button" class="cat-tile" :class="{ on: form.category === c }" v-for="c in categories" :key="c" @click="form.category = c">
-              <span class="cat-ico sm" :style="{ background: catColor(c) }" v-html="catIconHtml(c)"></span>
-              <span class="nm">{{ c }}</span>
-            </button>
-          </div>
+          <button type="button" class="cat-pick" :class="{ empty: !form.category }" @click="showCatSheet = true">
+            <span class="cat-ico sm" v-if="form.category" :style="{ background: catColor(form.category) }" v-html="catIconHtml(form.category)"></span>
+            <span class="nm">{{ form.category || 'Pilih kategori' }}</span>
+            <span class="chev">&#9660;</span>
+          </button>
 
+        </div>
+
+        <div class="card amount-card" style="margin-top:14px">
+          <div class="hint">Jumlah</div>
+          <div class="amount-row" aria-live="polite"><span class="rp">Rp</span><span class="amt-val num" :class="{ empty: !form.amount }">{{ amountText }}</span></div>
+        </div>
+        <div class="keypad" role="group" aria-label="Papan angka">
+          <button v-for="k in ['1','2','3','4','5','6','7','8','9']" :key="k" type="button" class="key" @click="keyPress(k)">{{ k }}</button>
+          <button type="button" class="key alt" @click="keyPress('000')">000</button>
+          <button type="button" class="key" @click="keyPress('0')">0</button>
+          <button type="button" class="key alt" aria-label="Hapus angka terakhir" @click="keyDel" @contextmenu.prevent="keyClear"><svg class="ic"><use href="#i-backspace"/></svg></button>
+        </div>
+
+        <div class="err" v-if="saveErr">{{ saveErr }}</div>
+        <div class="save-bar">
+          <button class="btn btn-primary btn-block" style="margin-top:0" :disabled="saving" @click="doSave"><span v-if="saving" class="spin spin-on-dark"></span>{{ saving ? 'Menyimpan...' : (editingId ? 'Simpan perubahan' : 'Simpan pengeluaran') }}</button>
+        </div>
+        <button type="button" class="det-row" @click="showDetails = !showDetails">
+          <span>{{ form.date === todayStr ? 'Hari ini' : form.date }}{{ form.note ? ' - ' + form.note : ' - tambah catatan' }}</span>
+          <span class="det-chev">{{ showDetails ? '&#9650;' : '&#9660;' }}</span>
+        </button>
+        <div class="card" v-if="showDetails" style="margin-top:10px">
           <label class="lbl">Tanggal</label>
           <div class="chips" style="margin-bottom:8px">
             <button type="button" class="chip" :class="{ on: form.date === todayStr }" @click="form.date = todayStr">Hari ini</button>
@@ -472,12 +501,23 @@ try {
           </div>
           <button v-else type="button" class="btn btn-text" style="margin-top:8px; padding-left:2px" @click="showMore = true">+ Tambah nama pencatat</button>
         </div>
-
-        <div class="err" v-if="saveErr">{{ saveErr }}</div>
-        <div class="save-bar">
-          <button class="btn btn-primary btn-block" style="margin-top:0" :disabled="saving" @click="doSave"><span v-if="saving" class="spin spin-on-dark"></span>{{ saving ? 'Menyimpan...' : (editingId ? 'Simpan perubahan' : 'Simpan pengeluaran') }}</button>
-        </div>
       </section>
+      <!-- UI v10.4 - lembar pilih kategori -->
+      <div class="sheet-back" v-if="showCatSheet" @click="showCatSheet = false"></div>
+      <div class="cat-sheet" v-if="showCatSheet" role="dialog" aria-label="Pilih kategori">
+        <div class="grab"></div>
+        <div class="sh-head">
+          <span class="sh-title">Pilih Kategori</span>
+          <button type="button" class="sh-close" @click="showCatSheet = false">Tutup</button>
+        </div>
+        <div class="cat-grid">
+          <button type="button" class="cat-tile" :class="{ on: form.category === c }" v-for="c in categories" :key="c" @click="form.category = c; showCatSheet = false">
+            <span class="cat-ico sm" :style="{ background: catColor(c) }" v-html="catIconHtml(c)"></span>
+            <span class="nm">{{ c }}</span>
+          </button>
+        </div>
+      </div>
+
 
       <!-- LAINNYA -->
       <section v-if="tab === 'more'">
@@ -1556,6 +1596,8 @@ if (!window.Vue) {
       var expandedId = VueApi.ref(null);
       function toggleTx(id) { expandedId.value = expandedId.value === id ? null : id; }
       var showMore = VueApi.ref(false);
+      var showDetails = VueApi.ref(false);
+      var showCatSheet = VueApi.ref(false);
       function shiftMonth(delta) {
         var p = String(month.value).split('-');
         if (p.length < 2) return;
@@ -1610,7 +1652,7 @@ if (!window.Vue) {
       VueApi.onMounted(function () {
         if (token.value) { loggedIn.value = true; boot(); }
       });
-      return { catStrong: catStrong, pctOf: pctOf, expandedId: expandedId, toggleTx: toggleTx, showMore: showMore, shiftMonth: shiftMonth, shiftReport: shiftReport, keyPress: keyPress, keyDel: keyDel, keyClear: keyClear, amountText: amountText, animTotal: animTotal, todayStr: todayStr, yesterdayStr: yesterdayStr, loggedIn: loggedIn, pw: pw, loginBusy: loginBusy, loginErr: loginErr, tab: tab, tabTitle: tabTitle, month: month, monthLabel: monthLabel, summary: summary, catList: catList, items: items, filteredItems: filteredItems, recentItems: recentItems, groupedItems: groupedItems, categories: categories, search: search, filterCat: filterCat, filterTeam: filterTeam, reportTeam: reportTeam, analysis: analysis, editingId: editingId, loading: loading, editingCat: editingCat, editCatName: editCatName, newCatName: newCatName, catErr: catErr, confirmDelete: confirmDelete, deleting: deleting, monthCompare: monthCompare, autoRules: autoRules, autoForm: autoForm, editingAuto: editingAuto, autoErr: autoErr, autoSaving: autoSaving, autoRunning: autoRunning, weekDays: weekDays, form: form, team: team, saving: saving, saveErr: saveErr, listErr: listErr, historyLimit: historyLimit, historyNote: historyNote, visibleReportItems: visibleReportItems, toast: toast, reportType: reportType, reportRef: reportRef, report: report, reportLoading: reportLoading, reportErr: reportErr, pdfBusy: pdfBusy, pdfErr: pdfErr, loadErr: loadErr, theme: theme, toggleTheme: toggleTheme, rupiah: rupiah, catColor: catColor, catIconHtml: catIconHtml, iconSvg: iconSvg, ICON_PATHS: ICON_PATHS, newCatIcon: newCatIcon, editCatIcon: editCatIcon, dayLabel: dayLabel, shortDate: shortDate, barWidth: barWidth, autoFreqText: autoFreqText, doLogin: doLogin, doLogout: doLogout, installApp: installApp, showInstallBtn: showInstallBtn, refresh: refresh, switchTab: switchTab, goAdd: goAdd, startEdit: startEdit, cancelEdit: cancelEdit, downloadCsv: downloadCsv, startCatEdit: startCatEdit, cancelCatEdit: cancelCatEdit, saveCatEdit: saveCatEdit, addCat: addCat, deleteCat: deleteCat, saveAuto: saveAuto, startAutoEdit: startAutoEdit, cancelAutoEdit: cancelAutoEdit, deleteAuto: deleteAuto, runAutoNow: runAutoNow, doSave: doSave, doDelete: doDelete, cancelDelete: cancelDelete, confirmDeleteYes: confirmDeleteYes, onReportType: onReportType, loadReport: loadReport, loadMoreReport: loadMoreReport, downloadPdf: downloadPdf };
+      return { catStrong: catStrong, pctOf: pctOf, expandedId: expandedId, toggleTx: toggleTx, showMore: showMore, showDetails: showDetails, showCatSheet: showCatSheet, shiftMonth: shiftMonth, shiftReport: shiftReport, keyPress: keyPress, keyDel: keyDel, keyClear: keyClear, amountText: amountText, animTotal: animTotal, todayStr: todayStr, yesterdayStr: yesterdayStr, loggedIn: loggedIn, pw: pw, loginBusy: loginBusy, loginErr: loginErr, tab: tab, tabTitle: tabTitle, month: month, monthLabel: monthLabel, summary: summary, catList: catList, items: items, filteredItems: filteredItems, recentItems: recentItems, groupedItems: groupedItems, categories: categories, search: search, filterCat: filterCat, filterTeam: filterTeam, reportTeam: reportTeam, analysis: analysis, editingId: editingId, loading: loading, editingCat: editingCat, editCatName: editCatName, newCatName: newCatName, catErr: catErr, confirmDelete: confirmDelete, deleting: deleting, monthCompare: monthCompare, autoRules: autoRules, autoForm: autoForm, editingAuto: editingAuto, autoErr: autoErr, autoSaving: autoSaving, autoRunning: autoRunning, weekDays: weekDays, form: form, team: team, saving: saving, saveErr: saveErr, listErr: listErr, historyLimit: historyLimit, historyNote: historyNote, visibleReportItems: visibleReportItems, toast: toast, reportType: reportType, reportRef: reportRef, report: report, reportLoading: reportLoading, reportErr: reportErr, pdfBusy: pdfBusy, pdfErr: pdfErr, loadErr: loadErr, theme: theme, toggleTheme: toggleTheme, rupiah: rupiah, catColor: catColor, catIconHtml: catIconHtml, iconSvg: iconSvg, ICON_PATHS: ICON_PATHS, newCatIcon: newCatIcon, editCatIcon: editCatIcon, dayLabel: dayLabel, shortDate: shortDate, barWidth: barWidth, autoFreqText: autoFreqText, doLogin: doLogin, doLogout: doLogout, installApp: installApp, showInstallBtn: showInstallBtn, refresh: refresh, switchTab: switchTab, goAdd: goAdd, startEdit: startEdit, cancelEdit: cancelEdit, downloadCsv: downloadCsv, startCatEdit: startCatEdit, cancelCatEdit: cancelCatEdit, saveCatEdit: saveCatEdit, addCat: addCat, deleteCat: deleteCat, saveAuto: saveAuto, startAutoEdit: startAutoEdit, cancelAutoEdit: cancelAutoEdit, deleteAuto: deleteAuto, runAutoNow: runAutoNow, doSave: doSave, doDelete: doDelete, cancelDelete: cancelDelete, confirmDeleteYes: confirmDeleteYes, onReportType: onReportType, loadReport: loadReport, loadMoreReport: loadMoreReport, downloadPdf: downloadPdf };
     }
   }).mount('#app');
 }
