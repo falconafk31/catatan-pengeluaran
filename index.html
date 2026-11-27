@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Inputin - Catatan Pengeluaran v10.4-pages (redesign UI/UX) -->
+<!-- Inputin - Catatan Pengeluaran v10.5-pages (redesign UI/UX) -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -353,6 +353,7 @@ try {
   <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 21h16"/></symbol>
   <symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></symbol>
   <symbol id="i-repeat" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></symbol>
   <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21z"/><path d="M9 8h6M9 12h6"/></symbol>
   <symbol id="i-backspace" viewBox="0 0 24 24"><path d="M21 5H9l-6 7 6 7h12z"/><path d="m13 9 4 6M17 9l-4 6"/></symbol>
   <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h13v4"/><path d="M3 7v11a2 2 0 0 0 2 2h15V9H5a2 2 0 0 1-2-2z"/><circle cx="16.5" cy="14.5" r="1"/></symbol>
@@ -378,7 +379,7 @@ try {
       <div class="topbar-in">
         <button v-if="tab === 'cats' || tab === 'auto'" class="icon-btn flat back" aria-label="Kembali" @click="switchTab('more')"><svg class="ic"><use href="#i-left"/></svg></button>
         <div class="grow">
-          <h1>{{ tabTitle }}<span class="ver" v-if="tab === 'home'">v10.4</span></h1>
+          <h1>{{ tabTitle }}<span class="ver" v-if="tab === 'home'">v10.5</span></h1>
           <div class="sub" v-if="tab === 'home'">{{ monthLabel }}</div>
         </div>
         <button v-if="tab === 'add' && editingId" class="btn btn-soft btn-sm" @click="cancelEdit(); switchTab('history')">Batal</button>
@@ -538,6 +539,10 @@ try {
             <span class="mi"><svg class="ic"><use :href="theme === 'dark' ? '#i-moon' : '#i-sun'"/></svg></span>
             <span class="mt">Mode gelap</span>
             <span class="switch" :class="{ on: theme === 'dark' }"></span>
+          </button>
+          <button class="menu-row" @click="clearCache">
+            <span class="mi"><svg class="ic"><use href="#i-refresh"/></svg></span>
+            <span class="mt">Hapus cache<div class="ms">{{ cacheInfo }}</div></span>
           </button>
           <button v-if="showInstallBtn" class="menu-row" @click="installApp">
             <span class="mi"><svg class="ic"><use href="#i-phone"/></svg></span>
@@ -974,6 +979,12 @@ if (!window.Vue) {
         if (parts.length < 2) return '';
         return MONTHS_ID[Number(parts[1]) - 1] + ' ' + parts[0];
       });
+      var cacheInfo = VueApi.computed(function () {
+        var c = readCache(month.value);
+        var n = summary.value ? summary.value.count : 0;
+        if (!c) return 'Belum ada data tersimpan di HP';
+        return 'Tersimpan: ' + n + ' transaksi ' + monthLabel.value;
+      });
       var catList = VueApi.computed(function () {
         var per = summary.value.perCategory || {};
         return Object.keys(per).map(function (k) { return { name: k, amount: per[k], color: catColor(k) }; }).sort(function (a, b) { return b.amount - a.amount; });
@@ -1112,6 +1123,11 @@ if (!window.Vue) {
       function doLogout() {
         call('logout', token.value).catch(function () {});
         clearSession();
+      }
+      function clearCache() {
+        try { localStorage.removeItem('cp_cache'); } catch (e) {}
+        showToast('Cache dibersihkan. Memuat data terbaru...');
+        refresh(true);
       }
       function loadCategories() {
         call('getCategories', token.value).then(function (cats) {
@@ -1652,7 +1668,7 @@ if (!window.Vue) {
       VueApi.onMounted(function () {
         if (token.value) { loggedIn.value = true; boot(); }
       });
-      return { catStrong: catStrong, pctOf: pctOf, expandedId: expandedId, toggleTx: toggleTx, showMore: showMore, showDetails: showDetails, showCatSheet: showCatSheet, shiftMonth: shiftMonth, shiftReport: shiftReport, keyPress: keyPress, keyDel: keyDel, keyClear: keyClear, amountText: amountText, animTotal: animTotal, todayStr: todayStr, yesterdayStr: yesterdayStr, loggedIn: loggedIn, pw: pw, loginBusy: loginBusy, loginErr: loginErr, tab: tab, tabTitle: tabTitle, month: month, monthLabel: monthLabel, summary: summary, catList: catList, items: items, filteredItems: filteredItems, recentItems: recentItems, groupedItems: groupedItems, categories: categories, search: search, filterCat: filterCat, filterTeam: filterTeam, reportTeam: reportTeam, analysis: analysis, editingId: editingId, loading: loading, editingCat: editingCat, editCatName: editCatName, newCatName: newCatName, catErr: catErr, confirmDelete: confirmDelete, deleting: deleting, monthCompare: monthCompare, autoRules: autoRules, autoForm: autoForm, editingAuto: editingAuto, autoErr: autoErr, autoSaving: autoSaving, autoRunning: autoRunning, weekDays: weekDays, form: form, team: team, saving: saving, saveErr: saveErr, listErr: listErr, historyLimit: historyLimit, historyNote: historyNote, visibleReportItems: visibleReportItems, toast: toast, reportType: reportType, reportRef: reportRef, report: report, reportLoading: reportLoading, reportErr: reportErr, pdfBusy: pdfBusy, pdfErr: pdfErr, loadErr: loadErr, theme: theme, toggleTheme: toggleTheme, rupiah: rupiah, catColor: catColor, catIconHtml: catIconHtml, iconSvg: iconSvg, ICON_PATHS: ICON_PATHS, newCatIcon: newCatIcon, editCatIcon: editCatIcon, dayLabel: dayLabel, shortDate: shortDate, barWidth: barWidth, autoFreqText: autoFreqText, doLogin: doLogin, doLogout: doLogout, installApp: installApp, showInstallBtn: showInstallBtn, refresh: refresh, switchTab: switchTab, goAdd: goAdd, startEdit: startEdit, cancelEdit: cancelEdit, downloadCsv: downloadCsv, startCatEdit: startCatEdit, cancelCatEdit: cancelCatEdit, saveCatEdit: saveCatEdit, addCat: addCat, deleteCat: deleteCat, saveAuto: saveAuto, startAutoEdit: startAutoEdit, cancelAutoEdit: cancelAutoEdit, deleteAuto: deleteAuto, runAutoNow: runAutoNow, doSave: doSave, doDelete: doDelete, cancelDelete: cancelDelete, confirmDeleteYes: confirmDeleteYes, onReportType: onReportType, loadReport: loadReport, loadMoreReport: loadMoreReport, downloadPdf: downloadPdf };
+      return { catStrong: catStrong, pctOf: pctOf, expandedId: expandedId, toggleTx: toggleTx, showMore: showMore, showDetails: showDetails, showCatSheet: showCatSheet, shiftMonth: shiftMonth, shiftReport: shiftReport, keyPress: keyPress, keyDel: keyDel, keyClear: keyClear, amountText: amountText, animTotal: animTotal, todayStr: todayStr, yesterdayStr: yesterdayStr, loggedIn: loggedIn, pw: pw, loginBusy: loginBusy, loginErr: loginErr, tab: tab, tabTitle: tabTitle, month: month, monthLabel: monthLabel, summary: summary, catList: catList, items: items, filteredItems: filteredItems, recentItems: recentItems, groupedItems: groupedItems, categories: categories, search: search, filterCat: filterCat, filterTeam: filterTeam, reportTeam: reportTeam, analysis: analysis, cacheInfo: cacheInfo, editingId: editingId, loading: loading, editingCat: editingCat, editCatName: editCatName, newCatName: newCatName, catErr: catErr, confirmDelete: confirmDelete, deleting: deleting, monthCompare: monthCompare, autoRules: autoRules, autoForm: autoForm, editingAuto: editingAuto, autoErr: autoErr, autoSaving: autoSaving, autoRunning: autoRunning, weekDays: weekDays, form: form, team: team, saving: saving, saveErr: saveErr, listErr: listErr, historyLimit: historyLimit, historyNote: historyNote, visibleReportItems: visibleReportItems, toast: toast, reportType: reportType, reportRef: reportRef, report: report, reportLoading: reportLoading, reportErr: reportErr, pdfBusy: pdfBusy, pdfErr: pdfErr, loadErr: loadErr, theme: theme, toggleTheme: toggleTheme, rupiah: rupiah, catColor: catColor, catIconHtml: catIconHtml, iconSvg: iconSvg, ICON_PATHS: ICON_PATHS, newCatIcon: newCatIcon, editCatIcon: editCatIcon, dayLabel: dayLabel, shortDate: shortDate, barWidth: barWidth, autoFreqText: autoFreqText, doLogin: doLogin, doLogout: doLogout, clearCache: clearCache, installApp: installApp, showInstallBtn: showInstallBtn, refresh: refresh, switchTab: switchTab, goAdd: goAdd, startEdit: startEdit, cancelEdit: cancelEdit, downloadCsv: downloadCsv, startCatEdit: startCatEdit, cancelCatEdit: cancelCatEdit, saveCatEdit: saveCatEdit, addCat: addCat, deleteCat: deleteCat, saveAuto: saveAuto, startAutoEdit: startAutoEdit, cancelAutoEdit: cancelAutoEdit, deleteAuto: deleteAuto, runAutoNow: runAutoNow, doSave: doSave, doDelete: doDelete, cancelDelete: cancelDelete, confirmDeleteYes: confirmDeleteYes, onReportType: onReportType, loadReport: loadReport, loadMoreReport: loadMoreReport, downloadPdf: downloadPdf };
     }
   }).mount('#app');
 }

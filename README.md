@@ -41,12 +41,15 @@ Frontend dan backend terpisah penuh: frontend tidak menyimpan data, semua baca/t
 
 - Satu file `index.html` (Vue 3 lewat CDN, tanpa build step).
 - PDF laporan dibuat di sisi klien dengan jsPDF 2.5.1 + jspdf-autotable 3.8.2.
-- `manifest.json` + `sw.js`: PWA installable; service worker cache-first untuk shell aplikasi saja (API dan CDN selalu network). Nama cache saat ini: `inputin-v13`. **Setiap deploy yang mengubah `index.html` wajib menaikkan nama cache di `sw.js`**, kalau tidak PWA terpasang terus menyajikan tampilan lama.
+- `manifest.json` + `sw.js`: PWA installable; service worker cache-first untuk shell aplikasi saja (API dan CDN selalu network). Nama cache saat ini: `inputin-v16`. **Setiap deploy yang mengubah `index.html` wajib menaikkan nama cache di `sw.js`**, kalau tidak PWA terpasang terus menyajikan tampilan lama.
 - Mobile-first, lebar acuan 390px; tampilan gelap/terang lewat variabel CSS di `:root` dan `html.dark`.
 - UI v10.0 (redesign Claude, 26 Nov 2026): navigasi bawah 5 tab (Beranda, Riwayat, tombol + tengah, Laporan, Lainnya); form Tambah memakai keypad angka; Beranda memakai kartu hero gradasi biru + diagram batang "Ke mana uangnya pergi"; Kelola Kategori dan Transaksi Otomatis pindah ke tab Lainnya; font Plus Jakarta Sans (Google Fonts, fallback font sistem bila gagal dimuat).
 - UI v10.1 (26 Nov 2026): Riwayat - filter kategori pindah ke bawah; chip Team satu baris lebar penuh tanpa geser, dropdown kategori lebar penuh di bawahnya.
 - UI v10.2 (26 Nov 2026): Beranda - badge versi kecil "v10.2" di kanan "Inputin" (hanya tab Beranda).
-- Versi frontend saat ini: **v10.2-pages**.
+- UI v10.3 (26 Nov 2026): Kelola Kategori - pilih ikon kategori dari grid 24 ikon SVG (disimpan di localStorage `cp_cat_icons` di HP, UI saja, backend/sheet tidak berubah).
+- UI v10.4 (26 Nov 2026): Tambah - urutan field ala Claude + pilih kategori jadi pop-up lembar bawah.
+- UI v10.5 (27 Nov 2026): Lainnya - tombol "Hapus cache" (hapus cache data bulan berjalan `cp_cache` lalu muat ulang dari server; subjudul menampilkan isi cache). Data bulan berjalan memang sudah tersimpan di cache browser sejak v9.4 (tampil instan, lalu data segar menimpa).
+- Versi frontend saat ini: **v10.5-pages**.
 
 ### Backend (API)
 
@@ -125,6 +128,9 @@ icon-512.png    Ikon PWA 512px
 | v10.0-pages | 26 Nov 2026 | Redesign UI/UX (Claude): nav 5 tab + tombol +, keypad Tambah, hero gradasi biru, tab Lainnya, font Plus Jakarta Sans; nama kategori panjang tetap 2 baris (perbaikan v9.9 dipertahankan) |
 | v10.1-pages | 26 Nov 2026 | Riwayat: filter kategori pindah ke bawah (chip Team lebar penuh, tanpa geser) |
 | v10.2-pages | 26 Nov 2026 | Beranda: badge versi kecil "v10.2" di kanan "Inputin" (hanya tab Beranda) |
+| v10.3-pages | 26 Nov 2026 | Kelola Kategori: pilih ikon kategori (grid 24 ikon SVG, localStorage `cp_cat_icons`) |
+| v10.4-pages | 26 Nov 2026 | Tambah: urutan field ala Claude + kategori pop-up lembar bawah |
+| v10.5-pages | 27 Nov 2026 | Lainnya: tombol "Hapus cache" (hapus `cp_cache`, muat ulang dari server, subjudul info cache) |
 
 ## Catatan keamanan
 
