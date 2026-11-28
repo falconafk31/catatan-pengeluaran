@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Inputin - Catatan Pengeluaran v10.5-pages (redesign UI/UX) -->
+<!-- Inputin - Catatan Pengeluaran v10.6-pages (redesign UI/UX) -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -379,7 +379,7 @@ try {
       <div class="topbar-in">
         <button v-if="tab === 'cats' || tab === 'auto'" class="icon-btn flat back" aria-label="Kembali" @click="switchTab('more')"><svg class="ic"><use href="#i-left"/></svg></button>
         <div class="grow">
-          <h1>{{ tabTitle }}<span class="ver" v-if="tab === 'home'">v10.5</span></h1>
+          <h1>{{ tabTitle }}<span class="ver" v-if="tab === 'home'">v10.6</span></h1>
           <div class="sub" v-if="tab === 'home'">{{ monthLabel }}</div>
         </div>
         <button v-if="tab === 'add' && editingId" class="btn btn-soft btn-sm" @click="cancelEdit(); switchTab('history')">Batal</button>
@@ -464,6 +464,9 @@ try {
             <span class="chev">&#9660;</span>
           </button>
 
+          <label class="lbl">Keterangan</label>
+          <input type="text" class="field" v-model="form.note" placeholder="contoh: Beli solar">
+
         </div>
 
         <div class="card amount-card" style="margin-top:14px">
@@ -482,7 +485,7 @@ try {
           <button class="btn btn-primary btn-block" style="margin-top:0" :disabled="saving" @click="doSave"><span v-if="saving" class="spin spin-on-dark"></span>{{ saving ? 'Menyimpan...' : (editingId ? 'Simpan perubahan' : 'Simpan pengeluaran') }}</button>
         </div>
         <button type="button" class="det-row" @click="showDetails = !showDetails">
-          <span>{{ form.date === todayStr ? 'Hari ini' : form.date }}{{ form.note ? ' - ' + form.note : ' - tambah catatan' }}</span>
+          <span>{{ form.date === todayStr ? 'Hari ini' : form.date }}</span>
           <span class="det-chev">{{ showDetails ? '&#9650;' : '&#9660;' }}</span>
         </button>
         <div class="card" v-if="showDetails" style="margin-top:10px">
@@ -492,9 +495,6 @@ try {
             <button type="button" class="chip" :class="{ on: form.date === yesterdayStr }" @click="form.date = yesterdayStr">Kemarin</button>
           </div>
           <input type="date" class="field" v-model="form.date" aria-label="Tanggal">
-
-          <label class="lbl">Keterangan</label>
-          <input type="text" class="field" v-model="form.note" placeholder="contoh: Beli solar">
 
           <div v-if="showMore || form.by">
             <label class="lbl">Dicatat oleh</label>
